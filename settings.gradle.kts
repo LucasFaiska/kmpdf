@@ -28,6 +28,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
+include(":sharedLogic")
 include(":sharedUI")
 include(":androidApp")
-
