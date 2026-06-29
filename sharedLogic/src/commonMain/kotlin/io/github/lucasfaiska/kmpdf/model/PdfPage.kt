@@ -1,7 +1,5 @@
 package io.github.lucasfaiska.kmpdf.model
 
-import androidx.compose.ui.graphics.ImageBitmap
-
 /**
  * Represents a single page within a [PdfDocument].
  *
@@ -13,11 +11,11 @@ interface PdfPage {
     val height: Int
 
     /**
-     * Renders the page into an [ImageBitmap].
+     * Renders the page into a [ByteArray] of pixels.
      *
      * @param width The target width of the rendered image.
      * @param height The target height of the rendered image.
-     * @return An [ImageBitmap] containing the rendered page.
+     * @return A [ByteArray] containing the rendered page pixels in ARGB format.
      */
-    fun render(width: Int, height: Int): ImageBitmap
+    suspend fun render(width: Int, height: Int): ByteArray
 }

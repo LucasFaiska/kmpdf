@@ -10,7 +10,14 @@ kotlin {
         namespace = "io.github.lucasfaiska.kmpdf.logic"
         compileSdk = 36
         minSdk = 23
-        compilerOptions { jvmTarget = JvmTarget.JVM_17 }
+
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+
+        withHostTest {
+            isIncludeAndroidResources = true
+        }
     }
 
     iosArm64()
@@ -18,11 +25,22 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            // Core logic only, avoiding UI dependencies
             implementation(libs.kotlinx.coroutines.core)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
+        }
+        androidMain.dependencies {
+            implementation(libs.kotlinx.coroutines.android)
+        }
+
+        getByName("androidHostTest") {
+            dependencies {
+                implementation(libs.robolectric)
+                implementation(libs.androidx.test.core)
+                implementation(libs.androidx.test.junit)
+                implementation(libs.kotlinx.coroutines.test)
+            }
         }
     }
 }
