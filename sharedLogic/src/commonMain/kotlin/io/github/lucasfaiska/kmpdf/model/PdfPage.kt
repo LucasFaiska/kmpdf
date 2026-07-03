@@ -17,5 +17,8 @@ interface PdfPage {
      * @param height The target height of the rendered image.
      * @return A [ByteArray] containing the rendered page pixels in ARGB format.
      */
-    suspend fun render(width: Int, height: Int): ByteArray
+    suspend fun render(
+        width: Int,
+        height: Int,
+    ): ByteArray
 }

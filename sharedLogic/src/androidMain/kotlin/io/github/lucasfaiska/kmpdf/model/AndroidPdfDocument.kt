@@ -5,9 +5,8 @@ import java.io.File
 
 internal class AndroidPdfDocument(
     private val renderer: PdfRenderer,
-    private val tempFile: File
+    private val tempFile: File,
 ) : PdfDocument {
-
     override val pageCount: Int = renderer.pageCount
 
     override fun getPage(index: Int): PdfPage {
