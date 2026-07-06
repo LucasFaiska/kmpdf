@@ -2,6 +2,7 @@ package io.github.lucasfaiska.kmpdf.reader
 
 import androidx.test.core.app.ApplicationProvider
 import io.github.lucasfaiska.kmpdf.model.PdfDocument
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
 import org.junit.Test
@@ -10,10 +11,10 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33])
+@Config(sdk = [34])
 class AndroidPdfReaderTest {
     private val context = ApplicationProvider.getApplicationContext<android.content.Context>()
-    private val reader = AndroidPdfReader(context)
+    private val reader = AndroidPdfReader(context, Dispatchers.Unconfined)
 
     @Test
     fun `given a valid PDF byte array when opening the document then the document should be created`() =
