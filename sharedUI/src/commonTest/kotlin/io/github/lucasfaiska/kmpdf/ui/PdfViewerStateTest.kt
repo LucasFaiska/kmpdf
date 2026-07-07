@@ -23,7 +23,9 @@ class PdfViewerStateTest {
 
     private class MockPdfDocument : PdfDocument {
         override val pageCount: Int = 5
+
         override fun getPage(index: Int) = throw NotImplementedError()
+
         override fun close() {}
     }
 

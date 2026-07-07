@@ -59,7 +59,9 @@ fun SelectionScreen(onSourceSelected: (PdfSource) -> Unit) {
         Button(
             onClick = {
                 onSourceSelected(
-                    PdfSource.Url("https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf"),
+                    PdfSource.Url(
+                        "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf",
+                    ),
                 )
             },
             modifier = Modifier.fillMaxWidth(0.7f).padding(8.dp),

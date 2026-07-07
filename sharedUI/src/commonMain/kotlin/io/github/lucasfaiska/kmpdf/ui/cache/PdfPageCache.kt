@@ -4,11 +4,18 @@ import androidx.compose.ui.graphics.ImageBitmap
 
 interface PdfPageCache {
     fun get(index: Int): ImageBitmap?
-    fun put(index: Int, bitmap: ImageBitmap)
+
+    fun put(
+        index: Int,
+        bitmap: ImageBitmap,
+    )
+
     fun clear()
 }
 
-class DefaultPdfPageCache(private val maxSize: Int) : PdfPageCache {
+class DefaultPdfPageCache(
+    private val maxSize: Int,
+) : PdfPageCache {
     private val cache = mutableMapOf<Int, ImageBitmap>()
     private val keys = mutableListOf<Int>()
 
@@ -21,7 +28,10 @@ class DefaultPdfPageCache(private val maxSize: Int) : PdfPageCache {
         return bitmap
     }
 
-    override fun put(index: Int, bitmap: ImageBitmap) {
+    override fun put(
+        index: Int,
+        bitmap: ImageBitmap,
+    ) {
         if (cache.containsKey(index)) {
             keys.remove(index)
         } else if (cache.size >= maxSize) {

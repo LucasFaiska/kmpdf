@@ -7,7 +7,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 class PdfPageCacheTest {
-
     private class MockBitmap : ImageBitmap {
         override val colorSpace: androidx.compose.ui.graphics.colorspace.ColorSpace
             get() = throw NotImplementedError()
@@ -17,7 +16,9 @@ class PdfPageCacheTest {
             get() = throw NotImplementedError()
         override val height: Int = 100
         override val width: Int = 100
+
         override fun prepareToDraw() {}
+
         override fun readPixels(
             buffer: IntArray,
             startX: Int,
@@ -25,7 +26,7 @@ class PdfPageCacheTest {
             width: Int,
             height: Int,
             bufferOffset: Int,
-            stride: Int
+            stride: Int,
         ) {}
     }
 
@@ -33,9 +34,9 @@ class PdfPageCacheTest {
     fun `given a cache when putting items then it should retrieve them`() {
         val cache = DefaultPdfPageCache(2)
         val bitmap1 = MockBitmap()
-        
+
         cache.put(1, bitmap1)
-        
+
         assertEquals(bitmap1, cache.get(1))
     }
 

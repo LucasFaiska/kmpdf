@@ -6,6 +6,7 @@ import io.github.lucasfaiska.kmpdf.repository.PdfRepository
 /**
  * CompositionLocal for [PdfRepository].
  */
-val LocalPdfRepository = compositionLocalOf<PdfRepository> {
-    error("No PdfRepository provided")
-}
+val LocalPdfRepository =
+    compositionLocalOf<PdfRepository> {
+        error("No PdfRepository provided")
+    }
