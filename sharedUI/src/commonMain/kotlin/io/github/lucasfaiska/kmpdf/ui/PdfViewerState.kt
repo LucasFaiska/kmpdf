@@ -2,20 +2,25 @@ package io.github.lucasfaiska.kmpdf.ui
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.ImageBitmap
-import io.github.lucasfaiska.kmpdf.loader.PdfLoader
 import io.github.lucasfaiska.kmpdf.model.PdfDocument
 import io.github.lucasfaiska.kmpdf.model.PdfSource
-import io.github.lucasfaiska.kmpdf.reader.PdfReader
+import io.github.lucasfaiska.kmpdf.repository.PdfRepository
+import io.github.lucasfaiska.kmpdf.ui.cache.LruPdfPageCache
+import io.github.lucasfaiska.kmpdf.ui.cache.PdfPageCache
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
  * State class for [PdfViewer] that manages document loading and page rendering.
+ *
+ * @param repository The [PdfRepository] used to load documents.
+ * @param cache The [PdfPageCache] used for rendered pages.
+ * @param coroutineScope The [CoroutineScope] for background tasks.
  */
 @Stable
 class PdfViewerState(
-    private val loader: PdfLoader,
-    private val reader: PdfReader,
+    private val repository: PdfRepository,
+    private val cache: PdfPageCache,
     private val coroutineScope: CoroutineScope,
 ) {
     var document by mutableStateOf<PdfDocument?>(null)
@@ -27,8 +32,6 @@ class PdfViewerState(
     var error by mutableStateOf<Throwable?>(null)
         private set
 
-    private val pageCache = mutableStateMapOf<Int, ImageBitmap>()
-
     /**
      * Loads a PDF document from the given [source].
      */
@@ -37,11 +40,10 @@ class PdfViewerState(
         error = null
         coroutineScope.launch {
             try {
-                val bytes = loader.load(source)
-                val newDocument = reader.open(bytes)
+                val newDocument = repository.loadDocument(source)
                 document?.close()
                 document = newDocument
-                pageCache.clear()
+                cache.clear()
             } catch (e: Exception) {
                 error = e
             } finally {
@@ -63,7 +65,7 @@ class PdfViewerState(
         width: Int,
         height: Int,
     ): ImageBitmap? {
-        val cached = pageCache[index]
+        val cached = cache.get(index)
         if (cached != null) return cached
 
         val doc = document ?: return null
@@ -74,7 +76,7 @@ class PdfViewerState(
                 val page = doc.getPage(index)
                 val bytes = page.render(width, height)
                 val bitmap = bytes.toImageBitmap(width, height)
-                pageCache[index] = bitmap
+                cache.put(index, bitmap)
             } catch (e: Exception) {
                 // Error handling to be refined
             }
@@ -89,19 +91,26 @@ class PdfViewerState(
     fun close() {
         document?.close()
         document = null
-        pageCache.clear()
+        cache.clear()
     }
 }
 
+/**
+ * Remembers a [PdfViewerState].
+ *
+ * @param repository The [PdfRepository] to use. Defaults to [LocalPdfRepository].
+ * @param cacheSize The maximum number of pages to keep in memory.
+ */
 @Composable
 fun rememberPdfViewerState(
-    loader: PdfLoader = rememberDefaultPdfLoader(),
-    reader: PdfReader = rememberDefaultPdfReader(),
+    repository: PdfRepository = LocalPdfRepository.current,
+    cacheSize: Int = 15,
 ): PdfViewerState {
     val scope = rememberCoroutineScope()
+    val cache = remember(cacheSize) { LruPdfPageCache(cacheSize) }
     val state =
-        remember(loader, reader, scope) {
-            PdfViewerState(loader, reader, scope)
+        remember(repository, cache, scope) {
+            PdfViewerState(repository, cache, scope)
         }
 
     DisposableEffect(state) {

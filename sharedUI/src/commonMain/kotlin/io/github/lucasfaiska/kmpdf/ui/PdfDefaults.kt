@@ -1,17 +1,10 @@
 package io.github.lucasfaiska.kmpdf.ui
 
 import androidx.compose.runtime.Composable
-import io.github.lucasfaiska.kmpdf.loader.PdfLoader
-import io.github.lucasfaiska.kmpdf.reader.PdfReader
+import io.github.lucasfaiska.kmpdf.repository.PdfRepository
 
 /**
- * Provides a default [PdfLoader] for the current platform.
+ * Provides a default [PdfRepository] for the current platform.
  */
 @Composable
-expect fun rememberDefaultPdfLoader(): PdfLoader
-
-/**
- * Provides a default [PdfReader] for the current platform.
- */
-@Composable
-expect fun rememberDefaultPdfReader(): PdfReader
+expect fun rememberDefaultPdfRepository(): PdfRepository

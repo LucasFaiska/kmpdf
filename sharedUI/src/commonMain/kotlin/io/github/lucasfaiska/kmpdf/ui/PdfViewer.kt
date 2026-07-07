@@ -16,19 +16,25 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import io.github.lucasfaiska.kmpdf.model.PdfSource
+import io.github.lucasfaiska.kmpdf.repository.PdfRepository
 
 /**
  * A Composable that displays a PDF document from a given source.
  *
  * @param source The [PdfSource] to load the PDF from.
  * @param modifier The modifier to be applied to the layout.
+ * @param repository The [PdfRepository] used to load the PDF. Defaults to [LocalPdfRepository].
  * @param state The state object to be used to control or observe the [PdfViewer] state.
  */
 @Composable
 fun PdfViewer(
     source: PdfSource,
     modifier: Modifier = Modifier,
-    state: PdfViewerState = rememberPdfViewerState(),
+    repository: PdfRepository = LocalPdfRepository.current,
+    state: PdfViewerState =
+        rememberPdfViewerState(
+            repository = repository,
+        ),
 ) {
     LaunchedEffect(source) {
         state.load(source)
