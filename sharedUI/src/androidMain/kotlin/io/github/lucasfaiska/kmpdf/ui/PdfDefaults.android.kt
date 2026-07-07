@@ -6,15 +6,15 @@ import androidx.compose.ui.platform.LocalContext
 import io.github.lucasfaiska.kmpdf.loader.AndroidPdfLoader
 import io.github.lucasfaiska.kmpdf.reader.AndroidPdfReader
 import io.github.lucasfaiska.kmpdf.repository.PdfRepository
-import io.github.lucasfaiska.kmpdf.repository.RealPdfRepository
+import io.github.lucasfaiska.kmpdf.repository.PdfRepositoryImpl
 import kotlinx.coroutines.Dispatchers
 
 @Composable
-actual fun rememberDefaultPdfRepository(): PdfRepository {
+actual fun rememberPdfRepository(): PdfRepository {
     val context = LocalContext.current
     return remember(context) {
         val loader = AndroidPdfLoader(context)
         val reader = AndroidPdfReader(context, Dispatchers.IO)
-        RealPdfRepository(loader, reader)
+        PdfRepositoryImpl(loader, reader)
     }
 }

@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import io.github.lucasfaiska.kmpdf.model.PdfDocument
 import io.github.lucasfaiska.kmpdf.model.PdfSource
 import io.github.lucasfaiska.kmpdf.repository.PdfRepository
-import io.github.lucasfaiska.kmpdf.ui.cache.LruPdfPageCache
+import io.github.lucasfaiska.kmpdf.ui.cache.DefaultPdfPageCache
 import io.github.lucasfaiska.kmpdf.ui.cache.PdfPageCache
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -61,7 +61,6 @@ class PdfViewerState(
                 val bitmap = bytes.toImageBitmap(width, height)
                 cache.put(index, bitmap)
             } catch (e: Exception) {
-                // Error handling to be refined
             }
         }
 
@@ -75,19 +74,13 @@ class PdfViewerState(
     }
 }
 
-/**
- * Remembers a [PdfViewerState].
- *
- * @param repository The [PdfRepository] to use. Defaults to [LocalPdfRepository].
- * @param cacheSize The maximum number of pages to keep in memory.
- */
 @Composable
 fun rememberPdfViewerState(
     repository: PdfRepository = LocalPdfRepository.current,
     cacheSize: Int = 15,
 ): PdfViewerState {
     val scope = rememberCoroutineScope()
-    val cache = remember(cacheSize) { LruPdfPageCache(cacheSize) }
+    val cache = remember(cacheSize) { DefaultPdfPageCache(cacheSize) }
     val state =
         remember(repository, cache, scope) {
             PdfViewerState(repository, cache, scope)

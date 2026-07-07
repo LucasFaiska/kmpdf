@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
-class LruPdfPageCacheTest {
+class PdfPageCacheTest {
 
     private class MockBitmap : ImageBitmap {
         override val colorSpace: androidx.compose.ui.graphics.colorspace.ColorSpace
@@ -17,7 +17,6 @@ class LruPdfPageCacheTest {
             get() = throw NotImplementedError()
         override val height: Int = 100
         override val width: Int = 100
-
         override fun prepareToDraw() {}
         override fun readPixels(
             buffer: IntArray,
@@ -32,7 +31,7 @@ class LruPdfPageCacheTest {
 
     @Test
     fun `given a cache when putting items then it should retrieve them`() {
-        val cache = LruPdfPageCache(2)
+        val cache = DefaultPdfPageCache(2)
         val bitmap1 = MockBitmap()
         
         cache.put(1, bitmap1)
@@ -42,15 +41,13 @@ class LruPdfPageCacheTest {
 
     @Test
     fun `given a cache when exceeding max size then it should evict oldest`() {
-        val cache = LruPdfPageCache(2)
+        val cache = DefaultPdfPageCache(2)
         val bitmap1 = MockBitmap()
         val bitmap2 = MockBitmap()
         val bitmap3 = MockBitmap()
 
         cache.put(1, bitmap1)
         cache.put(2, bitmap2)
-        
-        // This should evict key 1
         cache.put(3, bitmap3)
 
         assertNull(cache.get(1))
@@ -60,18 +57,14 @@ class LruPdfPageCacheTest {
 
     @Test
     fun `given a cache when item is accessed then it should be moved to recently used`() {
-        val cache = LruPdfPageCache(2)
+        val cache = DefaultPdfPageCache(2)
         val bitmap1 = MockBitmap()
         val bitmap2 = MockBitmap()
         val bitmap3 = MockBitmap()
 
         cache.put(1, bitmap1)
         cache.put(2, bitmap2)
-        
-        // Access 1, making it most recently used
         cache.get(1)
-        
-        // This should now evict key 2
         cache.put(3, bitmap3)
 
         assertNotNull(cache.get(1))

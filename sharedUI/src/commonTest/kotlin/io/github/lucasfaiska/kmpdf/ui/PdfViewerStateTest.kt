@@ -3,7 +3,7 @@ package io.github.lucasfaiska.kmpdf.ui
 import io.github.lucasfaiska.kmpdf.model.PdfDocument
 import io.github.lucasfaiska.kmpdf.model.PdfSource
 import io.github.lucasfaiska.kmpdf.repository.PdfRepository
-import io.github.lucasfaiska.kmpdf.ui.cache.LruPdfPageCache
+import io.github.lucasfaiska.kmpdf.ui.cache.DefaultPdfPageCache
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -23,9 +23,7 @@ class PdfViewerStateTest {
 
     private class MockPdfDocument : PdfDocument {
         override val pageCount: Int = 5
-
         override fun getPage(index: Int) = throw NotImplementedError()
-
         override fun close() {}
     }
 
@@ -42,10 +40,8 @@ class PdfViewerStateTest {
 
     @Test
     fun `given a new state when created then it should be empty`() {
-        // Given
-        val state = PdfViewerState(MockPdfRepository(), LruPdfPageCache(5), testScope)
+        val state = PdfViewerState(MockPdfRepository(), DefaultPdfPageCache(5), testScope)
 
-        // Then
         assertNull(state.document)
         assertFalse(state.loading)
         assertNull(state.error)
@@ -54,20 +50,13 @@ class PdfViewerStateTest {
     @Test
     fun `given a source when loading successfully then it should update document and status`() =
         testScope.runTest {
-            // Given
             val repository = MockPdfRepository()
-            val state = PdfViewerState(repository, LruPdfPageCache(5), this)
+            val state = PdfViewerState(repository, DefaultPdfPageCache(5), this)
 
-            // When
             state.load(PdfSource.Local("test"))
-
-            // Then
             assertTrue(state.loading)
-
-            // When
             advanceUntilIdle()
 
-            // Then
             assertFalse(state.loading)
             assertNotNull(state.document)
             assertEquals(5, state.document?.pageCount)
@@ -77,15 +66,12 @@ class PdfViewerStateTest {
     @Test
     fun `given a failing repository when loading then it should handle error`() =
         testScope.runTest {
-            // Given
             val repository = MockPdfRepository().apply { shouldFail = true }
-            val state = PdfViewerState(repository, LruPdfPageCache(5), this)
+            val state = PdfViewerState(repository, DefaultPdfPageCache(5), this)
 
-            // When
             state.load(PdfSource.Url("http://error.com"))
             advanceUntilIdle()
 
-            // Then
             assertFalse(state.loading)
             assertNull(state.document)
             assertNotNull(state.error)

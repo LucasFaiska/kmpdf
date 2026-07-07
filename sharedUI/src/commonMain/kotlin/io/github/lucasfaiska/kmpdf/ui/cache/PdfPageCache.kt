@@ -8,7 +8,7 @@ interface PdfPageCache {
     fun clear()
 }
 
-class LruPdfPageCache(private val maxSize: Int) : PdfPageCache {
+class DefaultPdfPageCache(private val maxSize: Int) : PdfPageCache {
     private val cache = mutableMapOf<Int, ImageBitmap>()
     private val keys = mutableListOf<Int>()
 
