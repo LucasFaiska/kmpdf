@@ -10,13 +10,6 @@ import io.github.lucasfaiska.kmpdf.ui.cache.PdfPageCache
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-/**
- * State class for [PdfViewer] that manages document loading and page rendering.
- *
- * @param repository The [PdfRepository] used to load documents.
- * @param cache The [PdfPageCache] used for rendered pages.
- * @param coroutineScope The [CoroutineScope] for background tasks.
- */
 @Stable
 class PdfViewerState(
     private val repository: PdfRepository,
@@ -32,9 +25,6 @@ class PdfViewerState(
     var error by mutableStateOf<Throwable?>(null)
         private set
 
-    /**
-     * Loads a PDF document from the given [source].
-     */
     fun load(source: PdfSource) {
         loading = true
         error = null
@@ -52,13 +42,6 @@ class PdfViewerState(
         }
     }
 
-    /**
-     * Gets or renders a page bitmap.
-     *
-     * @param index The 0-based page index.
-     * @param width The target width for rendering.
-     * @param height The target height for rendering.
-     */
     @Composable
     fun getPage(
         index: Int,
@@ -85,9 +68,6 @@ class PdfViewerState(
         return null
     }
 
-    /**
-     * Releases document resources.
-     */
     fun close() {
         document?.close()
         document = null
