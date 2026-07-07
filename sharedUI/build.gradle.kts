@@ -16,6 +16,10 @@ kotlin {
         minSdk = 23
         androidResources.enable = true
         compilerOptions { jvmTarget = JvmTarget.JVM_17 }
+
+        withHostTest {
+            isIncludeAndroidResources = true
+        }
     }
 
     iosArm64()
@@ -29,7 +33,8 @@ kotlin {
             api(libs.compose.resources)
             api(libs.compose.ui.tooling.preview)
             api(libs.compose.material3)
-            implementation(project(":sharedLogic"))
+            implementation(libs.ktor.client.core)
+            api(project(":sharedLogic"))
         }
 
         commonTest.dependencies {
@@ -38,6 +43,17 @@ kotlin {
         }
 
         androidMain.dependencies {
+            implementation(libs.androidx.core.ktx)
+        }
+
+        getByName("androidHostTest") {
+            dependencies {
+                implementation(libs.robolectric)
+                implementation(libs.androidx.test.core)
+                implementation(libs.androidx.test.junit)
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.compose.ui.test)
+            }
         }
     }
 
