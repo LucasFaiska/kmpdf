@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 
 @Stable
 class PdfViewerState(
-    private val repository: PdfRepository,
     private val cache: PdfPageCache,
     private val coroutineScope: CoroutineScope,
 ) {
@@ -25,7 +24,10 @@ class PdfViewerState(
     var error by mutableStateOf<Throwable?>(null)
         private set
 
-    fun load(source: PdfSource) {
+    fun load(
+        source: PdfSource,
+        repository: PdfRepository,
+    ) {
         loading = true
         error = null
         coroutineScope.launch {
@@ -75,15 +77,13 @@ class PdfViewerState(
 }
 
 @Composable
-fun rememberPdfViewerState(
-    repository: PdfRepository = LocalPdfRepository.current,
-    cacheSize: Int = 15,
-): PdfViewerState {
+fun rememberPdfViewerState(cacheSize: Int = 15): PdfViewerState {
     val scope = rememberCoroutineScope()
     val cache = remember(cacheSize) { DefaultPdfPageCache(cacheSize) }
+
     val state =
-        remember(repository, cache, scope) {
-            PdfViewerState(repository, cache, scope)
+        remember(cache, scope) {
+            PdfViewerState(cache, scope)
         }
 
     DisposableEffect(state) {

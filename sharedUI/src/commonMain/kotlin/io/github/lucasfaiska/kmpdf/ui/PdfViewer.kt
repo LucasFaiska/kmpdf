@@ -1,50 +1,92 @@
 package io.github.lucasfaiska.kmpdf.ui
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.gestures.TransformableState
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import io.github.lucasfaiska.kmpdf.model.PdfSource
-import io.github.lucasfaiska.kmpdf.repository.PdfRepository
 
 /**
- * A Composable that displays a PDF document from a given source.
- *
- * @param source The [PdfSource] to load the PDF from.
- * @param modifier The modifier to be applied to the layout.
- * @param repository The [PdfRepository] used to load the PDF. Defaults to [LocalPdfRepository].
- * @param state The state object to be used to control or observe the [PdfViewer] state.
+ * Displays a PDF document from a remote URL.
+ */
+@Composable
+fun PdfViewer(
+    url: String,
+    modifier: Modifier = Modifier,
+    state: PdfViewerState = rememberPdfViewerState(),
+    loadingContent: @Composable () -> Unit = { DefaultLoadingContent() },
+    errorContent: @Composable (Throwable) -> Unit = {},
+) {
+    PdfViewerCore(
+        source = PdfSource.Url(url),
+        modifier = modifier,
+        state = state,
+        loadingContent = loadingContent,
+        errorContent = errorContent,
+    )
+}
+
+/**
+ * Displays a PDF document from a local identifier (e.g., assets or file path).
+ */
+@Composable
+fun PdfViewer(
+    modifier: Modifier = Modifier,
+    identifier: String,
+    state: PdfViewerState = rememberPdfViewerState(),
+    loadingContent: @Composable () -> Unit = { DefaultLoadingContent() },
+    errorContent: @Composable (Throwable) -> Unit = {},
+) {
+    PdfViewerCore(
+        source = PdfSource.Local(identifier),
+        modifier = modifier,
+        state = state,
+        loadingContent = loadingContent,
+        errorContent = errorContent,
+    )
+}
+
+/**
+ * Displays a PDF document from a [PdfSource].
  */
 @Composable
 fun PdfViewer(
     source: PdfSource,
     modifier: Modifier = Modifier,
-    repository: PdfRepository = LocalPdfRepository.current,
-    state: PdfViewerState =
-        rememberPdfViewerState(
-            repository = repository,
-        ),
+    state: PdfViewerState = rememberPdfViewerState(),
+    loadingContent: @Composable () -> Unit = { DefaultLoadingContent() },
+    errorContent: @Composable (Throwable) -> Unit = {},
 ) {
-    LaunchedEffect(source) {
-        state.load(source)
-    }
+    PdfViewerCore(
+        source = source,
+        modifier = modifier,
+        state = state,
+        loadingContent = loadingContent,
+        errorContent = errorContent,
+    )
+}
 
-    var scale by remember { mutableStateOf(1f) }
-    val transformState =
-        rememberTransformableState { _, zoomChange, _, _ ->
-            scale = (scale * zoomChange).coerceIn(1f, 5f)
-        }
+@Composable
+private fun PdfViewerCore(
+    source: PdfSource,
+    modifier: Modifier,
+    state: PdfViewerState,
+    loadingContent: @Composable () -> Unit,
+    errorContent: @Composable (Throwable) -> Unit,
+) {
+    val repository = rememberPdfRepository()
+
+    LaunchedEffect(source, repository) {
+        state.load(source, repository)
+    }
 
     Box(
         modifier = modifier,
@@ -52,16 +94,16 @@ fun PdfViewer(
     ) {
         when {
             state.loading -> {
-                CircularProgressIndicator()
+                loadingContent()
             }
+
             state.error != null -> {
-                Text("Error loading PDF: ${state.error?.message}")
+                errorContent(state.error!!)
             }
+
             state.document != null -> {
                 PdfContent(
                     state = state,
-                    scale = scale,
-                    transformState = transformState,
                     modifier = Modifier.fillMaxSize(),
                 )
             }
@@ -69,22 +111,21 @@ fun PdfViewer(
     }
 }
 
-/**
- * Internal content of the [PdfViewer] that renders the list of pages.
- */
+@Composable
+private fun DefaultLoadingContent() {
+    CircularProgressIndicator()
+}
+
 @Composable
 private fun PdfContent(
     state: PdfViewerState,
-    scale: Float,
-    transformState: TransformableState,
-    modifier: Modifier = Modifier,
+    modifier: Modifier,
 ) {
     val document = state.document ?: return
+    val transformState = rememberTransformableState { _, _, _, _ -> }
 
     LazyColumn(
-        modifier =
-            modifier
-                .transformable(state = transformState),
+        modifier = modifier.transformable(state = transformState),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -93,40 +134,30 @@ private fun PdfContent(
             PdfPageItem(
                 state = state,
                 index = index,
-                scale = scale,
             )
         }
     }
 }
 
-/**
- * A single page item in the PDF list.
- */
 @Composable
 private fun PdfPageItem(
     state: PdfViewerState,
     index: Int,
-    scale: Float,
 ) {
     BoxWithConstraints(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .aspectRatio(0.707f)
-                .graphicsLayer(
-                    scaleX = scale,
-                    scaleY = scale,
-                ),
+                .aspectRatio(0.707f),
     ) {
         val width = constraints.maxWidth
         val height = constraints.maxHeight
-
         val bitmap: ImageBitmap? = state.getPage(index, width, height)
 
         if (bitmap != null) {
             Image(
                 bitmap = bitmap,
-                contentDescription = "Page ${index + 1}",
+                contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Fit,
             )
