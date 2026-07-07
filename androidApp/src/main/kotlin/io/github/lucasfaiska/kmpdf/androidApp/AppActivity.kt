@@ -59,10 +59,15 @@ fun SelectionScreen(onSourceSelected: (PdfSource) -> Unit) {
         Button(
             onClick = {
                 onSourceSelected(
-                    PdfSource.Url("https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf"),
+                    PdfSource.Url(
+                        "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf",
+                    ),
                 )
             },
-            modifier = Modifier.fillMaxWidth(0.7f).padding(8.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth(0.7f)
+                    .padding(8.dp),
         ) {
             Text("Load from URL (Remote)")
         }
@@ -73,7 +78,10 @@ fun SelectionScreen(onSourceSelected: (PdfSource) -> Unit) {
                     PdfSource.Local("file:///android_asset/sample.pdf"),
                 )
             },
-            modifier = Modifier.fillMaxWidth(0.7f).padding(8.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth(0.7f)
+                    .padding(8.dp),
         ) {
             Text("Load from Assets (Local)")
         }
@@ -100,9 +108,23 @@ fun ViewerScreen(
             )
         },
     ) { padding ->
-        PdfViewer(
-            source = source,
-            modifier = Modifier.fillMaxSize().padding(padding),
-        )
+        val modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(padding)
+
+        when (source) {
+            is PdfSource.Url ->
+                PdfViewer(
+                    url = source.url,
+                    modifier = modifier,
+                )
+
+            is PdfSource.Local ->
+                PdfViewer(
+                    identifier = source.identifier,
+                    modifier = modifier,
+                )
+        }
     }
 }

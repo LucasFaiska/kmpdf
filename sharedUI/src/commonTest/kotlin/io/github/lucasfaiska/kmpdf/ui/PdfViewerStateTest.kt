@@ -1,9 +1,9 @@
 package io.github.lucasfaiska.kmpdf.ui
 
-import io.github.lucasfaiska.kmpdf.loader.PdfLoader
 import io.github.lucasfaiska.kmpdf.model.PdfDocument
 import io.github.lucasfaiska.kmpdf.model.PdfSource
-import io.github.lucasfaiska.kmpdf.reader.PdfReader
+import io.github.lucasfaiska.kmpdf.repository.PdfRepository
+import io.github.lucasfaiska.kmpdf.ui.cache.PdfPageCacheImpl
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -21,15 +21,6 @@ class PdfViewerStateTest {
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    private class MockPdfLoader : PdfLoader {
-        var loadCalled = false
-
-        override suspend fun load(source: PdfSource): ByteArray {
-            loadCalled = true
-            return byteArrayOf(1, 2, 3)
-        }
-    }
-
     private class MockPdfDocument : PdfDocument {
         override val pageCount: Int = 5
 
@@ -38,16 +29,21 @@ class PdfViewerStateTest {
         override fun close() {}
     }
 
-    private class MockPdfReader : PdfReader {
-        override suspend fun open(bytes: ByteArray): PdfDocument = MockPdfDocument()
+    private class MockPdfRepository : PdfRepository {
+        var loadCalled = false
+        var shouldFail = false
+
+        override suspend fun loadDocument(source: PdfSource): PdfDocument {
+            loadCalled = true
+            if (shouldFail) throw Exception("Load Error")
+            return MockPdfDocument()
+        }
     }
 
     @Test
     fun `given a new state when created then it should be empty`() {
-        // Given
-        val state = PdfViewerState(MockPdfLoader(), MockPdfReader(), testScope)
+        val state = PdfViewerState(PdfPageCacheImpl(5), testScope)
 
-        // Then
         assertNull(state.document)
         assertFalse(state.loading)
         assertNull(state.error)
@@ -56,44 +52,31 @@ class PdfViewerStateTest {
     @Test
     fun `given a source when loading successfully then it should update document and status`() =
         testScope.runTest {
-            // Given
-            val loader = MockPdfLoader()
-            val state = PdfViewerState(loader, MockPdfReader(), this)
+            val repository = MockPdfRepository()
+            val state = PdfViewerState(PdfPageCacheImpl(5), this)
 
-            // When
-            state.load(PdfSource.Local("test"))
-
-            // Then
+            state.load(PdfSource.Local("test"), repository)
             assertTrue(state.loading)
-
-            // When
             advanceUntilIdle()
 
-            // Then
             assertFalse(state.loading)
             assertNotNull(state.document)
             assertEquals(5, state.document?.pageCount)
-            assertTrue(loader.loadCalled)
+            assertTrue(repository.loadCalled)
         }
 
     @Test
-    fun `given a failing loader when loading then it should handle error`() =
+    fun `given a failing repository when loading then it should handle error`() =
         testScope.runTest {
-            // Given
-            val failingLoader =
-                object : PdfLoader {
-                    override suspend fun load(source: PdfSource): ByteArray = throw Exception("Network Error")
-                }
-            val state = PdfViewerState(failingLoader, MockPdfReader(), this)
+            val repository = MockPdfRepository().apply { shouldFail = true }
+            val state = PdfViewerState(PdfPageCacheImpl(5), this)
 
-            // When
-            state.load(PdfSource.Url("http://error.com"))
+            state.load(PdfSource.Url("http://error.com"), repository)
             advanceUntilIdle()
 
-            // Then
             assertFalse(state.loading)
             assertNull(state.document)
             assertNotNull(state.error)
-            assertEquals("Network Error", state.error?.message)
+            assertEquals("Load Error", state.error?.message)
         }
 }

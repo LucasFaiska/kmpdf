@@ -2,10 +2,11 @@ package io.github.lucasfaiska.kmpdf.preview
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import io.github.lucasfaiska.kmpdf.model.PdfDocument
 import io.github.lucasfaiska.kmpdf.model.PdfSource
+import io.github.lucasfaiska.kmpdf.repository.PdfRepository
 import io.github.lucasfaiska.kmpdf.ui.PdfViewer
 import io.github.lucasfaiska.kmpdf.ui.rememberPdfViewerState
 
@@ -22,13 +23,14 @@ fun PdfViewerPreview() {
 @Composable
 fun PdfViewerLoadingPreview() {
     val state = rememberPdfViewerState()
-    // Simulating loading
-    LaunchedEffect(Unit) {
-        state.load(PdfSource.Url("https://example.com/sample.pdf"))
-    }
+
     PdfViewer(
         source = PdfSource.Url("https://example.com/sample.pdf"),
         state = state,
         modifier = Modifier.fillMaxSize(),
     )
+}
+
+private class MockPdfRepository : PdfRepository {
+    override suspend fun loadDocument(source: PdfSource): PdfDocument = throw NotImplementedError()
 }
