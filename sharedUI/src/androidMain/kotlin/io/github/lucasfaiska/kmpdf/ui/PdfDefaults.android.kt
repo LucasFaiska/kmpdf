@@ -10,7 +10,7 @@ import io.github.lucasfaiska.kmpdf.repository.PdfRepositoryImpl
 import kotlinx.coroutines.Dispatchers
 
 @Composable
-actual fun rememberPdfRepository(): PdfRepository {
+internal actual fun rememberPdfRepository(): PdfRepository {
     val context = LocalContext.current
     return remember(context) {
         val loader = AndroidPdfLoader(context)

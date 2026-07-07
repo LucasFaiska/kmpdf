@@ -3,7 +3,7 @@ package io.github.lucasfaiska.kmpdf.ui
 import io.github.lucasfaiska.kmpdf.model.PdfDocument
 import io.github.lucasfaiska.kmpdf.model.PdfSource
 import io.github.lucasfaiska.kmpdf.repository.PdfRepository
-import io.github.lucasfaiska.kmpdf.ui.cache.DefaultPdfPageCache
+import io.github.lucasfaiska.kmpdf.ui.cache.PdfPageCacheImpl
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -42,7 +42,7 @@ class PdfViewerStateTest {
 
     @Test
     fun `given a new state when created then it should be empty`() {
-        val state = PdfViewerState(MockPdfRepository(), DefaultPdfPageCache(5), testScope)
+        val state = PdfViewerState(PdfPageCacheImpl(5), testScope)
 
         assertNull(state.document)
         assertFalse(state.loading)
@@ -53,9 +53,9 @@ class PdfViewerStateTest {
     fun `given a source when loading successfully then it should update document and status`() =
         testScope.runTest {
             val repository = MockPdfRepository()
-            val state = PdfViewerState(repository, DefaultPdfPageCache(5), this)
+            val state = PdfViewerState(PdfPageCacheImpl(5), this)
 
-            state.load(PdfSource.Local("test"))
+            state.load(PdfSource.Local("test"), repository)
             assertTrue(state.loading)
             advanceUntilIdle()
 
@@ -69,9 +69,9 @@ class PdfViewerStateTest {
     fun `given a failing repository when loading then it should handle error`() =
         testScope.runTest {
             val repository = MockPdfRepository().apply { shouldFail = true }
-            val state = PdfViewerState(repository, DefaultPdfPageCache(5), this)
+            val state = PdfViewerState(PdfPageCacheImpl(5), this)
 
-            state.load(PdfSource.Url("http://error.com"))
+            state.load(PdfSource.Url("http://error.com"), repository)
             advanceUntilIdle()
 
             assertFalse(state.loading)

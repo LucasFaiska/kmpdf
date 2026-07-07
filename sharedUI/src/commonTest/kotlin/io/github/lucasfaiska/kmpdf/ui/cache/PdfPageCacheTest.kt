@@ -32,7 +32,7 @@ class PdfPageCacheTest {
 
     @Test
     fun `given a cache when putting items then it should retrieve them`() {
-        val cache = DefaultPdfPageCache(2)
+        val cache = PdfPageCacheImpl(2)
         val bitmap1 = MockBitmap()
 
         cache.put(1, bitmap1)
@@ -42,7 +42,7 @@ class PdfPageCacheTest {
 
     @Test
     fun `given a cache when exceeding max size then it should evict oldest`() {
-        val cache = DefaultPdfPageCache(2)
+        val cache = PdfPageCacheImpl(2)
         val bitmap1 = MockBitmap()
         val bitmap2 = MockBitmap()
         val bitmap3 = MockBitmap()
@@ -58,7 +58,7 @@ class PdfPageCacheTest {
 
     @Test
     fun `given a cache when item is accessed then it should be moved to recently used`() {
-        val cache = DefaultPdfPageCache(2)
+        val cache = PdfPageCacheImpl(2)
         val bitmap1 = MockBitmap()
         val bitmap2 = MockBitmap()
         val bitmap3 = MockBitmap()

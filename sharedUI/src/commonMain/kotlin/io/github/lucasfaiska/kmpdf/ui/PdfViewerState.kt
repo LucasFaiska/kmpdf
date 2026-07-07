@@ -5,13 +5,13 @@ import androidx.compose.ui.graphics.ImageBitmap
 import io.github.lucasfaiska.kmpdf.model.PdfDocument
 import io.github.lucasfaiska.kmpdf.model.PdfSource
 import io.github.lucasfaiska.kmpdf.repository.PdfRepository
-import io.github.lucasfaiska.kmpdf.ui.cache.DefaultPdfPageCache
 import io.github.lucasfaiska.kmpdf.ui.cache.PdfPageCache
+import io.github.lucasfaiska.kmpdf.ui.cache.PdfPageCacheImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Stable
-class PdfViewerState(
+class PdfViewerState internal constructor(
     private val cache: PdfPageCache,
     private val coroutineScope: CoroutineScope,
 ) {
@@ -24,7 +24,7 @@ class PdfViewerState(
     var error by mutableStateOf<Throwable?>(null)
         private set
 
-    fun load(
+    internal fun load(
         source: PdfSource,
         repository: PdfRepository,
     ) {
@@ -45,7 +45,7 @@ class PdfViewerState(
     }
 
     @Composable
-    fun getPage(
+    internal fun getPage(
         index: Int,
         width: Int,
         height: Int,
@@ -79,7 +79,7 @@ class PdfViewerState(
 @Composable
 fun rememberPdfViewerState(cacheSize: Int = 15): PdfViewerState {
     val scope = rememberCoroutineScope()
-    val cache = remember(cacheSize) { DefaultPdfPageCache(cacheSize) }
+    val cache = remember(cacheSize) { PdfPageCacheImpl(cacheSize) }
 
     val state =
         remember(cache, scope) {

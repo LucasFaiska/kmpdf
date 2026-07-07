@@ -4,4 +4,4 @@ import androidx.compose.runtime.Composable
 import io.github.lucasfaiska.kmpdf.repository.PdfRepository
 
 @Composable
-expect fun rememberPdfRepository(): PdfRepository
+internal expect fun rememberPdfRepository(): PdfRepository

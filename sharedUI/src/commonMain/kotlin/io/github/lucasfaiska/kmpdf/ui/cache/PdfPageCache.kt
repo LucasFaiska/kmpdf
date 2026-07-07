@@ -2,7 +2,7 @@ package io.github.lucasfaiska.kmpdf.ui.cache
 
 import androidx.compose.ui.graphics.ImageBitmap
 
-interface PdfPageCache {
+internal interface PdfPageCache {
     fun get(index: Int): ImageBitmap?
 
     fun put(
@@ -13,7 +13,7 @@ interface PdfPageCache {
     fun clear()
 }
 
-class DefaultPdfPageCache(
+internal class PdfPageCacheImpl(
     private val maxSize: Int,
 ) : PdfPageCache {
     private val cache = mutableMapOf<Int, ImageBitmap>()
