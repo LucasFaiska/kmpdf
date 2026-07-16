@@ -124,7 +124,7 @@ private fun PdfViewerCore(
     Scaffold(
         modifier = modifier,
         topBar = {
-            if (showToolbar) {
+            if (showToolbar && !state.loading && state.error == null) {
                 PdfToolbar(state = state, source = source)
             }
         },

@@ -15,70 +15,83 @@ internal class AndroidPdfPlatformActions(
     private val context: android.content.Context,
 ) : PdfPlatformActions {
     override fun share(source: PdfSource) {
-        val sendIntent: Intent =
-            Intent().apply {
-                action = Intent.ACTION_SEND
-                when (source) {
-                    is PdfSource.Url -> {
-                        putExtra(Intent.EXTRA_TEXT, source.url)
-                        type = "text/plain"
-                    }
-
-                    is PdfSource.Local -> {
-                        val file = getFileFromIdentifier(source.identifier)
-                        if (file != null && file.exists()) {
-                            val uri =
-                                FileProvider.getUriForFile(
-                                    context,
-                                    "${context.packageName}.fileprovider",
-                                    file,
-                                )
-                            putExtra(Intent.EXTRA_STREAM, uri)
-                            type = "application/pdf"
-                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        } else {
-                            putExtra(Intent.EXTRA_TEXT, source.identifier)
-                            type = "text/plain"
-                        }
-                    }
-                }
+        val sendIntent =
+            when (source) {
+                is PdfSource.Url -> createTextShareIntent(source.url)
+                is PdfSource.Local -> createFileShareIntent(source.identifier)
             }
-        val shareIntent = Intent.createChooser(sendIntent, null)
+        startShareActivity(sendIntent)
+    }
+
+    private fun createTextShareIntent(text: String): Intent =
+        Intent(Intent.ACTION_SEND).apply {
+            putExtra(Intent.EXTRA_TEXT, text)
+            type = "text/plain"
+        }
+
+    private fun createFileShareIntent(identifier: String): Intent {
+        val file = getFileFromIdentifier(identifier)
+        return if (file != null && file.exists()) {
+            val uri =
+                FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    file,
+                )
+            Intent(Intent.ACTION_SEND).apply {
+                putExtra(Intent.EXTRA_STREAM, uri)
+                type = "application/pdf"
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+        } else {
+            createTextShareIntent(identifier)
+        }
+    }
+
+    private fun startShareActivity(intent: Intent) {
+        val shareIntent = Intent.createChooser(intent, null)
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(shareIntent)
     }
 
     private fun getFileFromIdentifier(identifier: String): File? =
         try {
-            if (identifier.startsWith("file:///android_asset/")) {
-                val assetPath = identifier.removePrefix("file:///android_asset/")
-                val fileName = assetPath.substringAfterLast('/')
-                val tempFile = File(context.cacheDir, fileName)
-                context.assets.open(assetPath).use { input ->
-                    tempFile.outputStream().use { output ->
-                        input.copyTo(output)
-                    }
-                }
-                tempFile
-            } else {
-                val uri = identifier.toUri()
-                if (uri.scheme == "content") {
-                    val fileName = getFileNameFromContentUri(uri) ?: "document.pdf"
-                    val tempFile = File(context.cacheDir, fileName)
-                    context.contentResolver.openInputStream(uri)?.use { input ->
-                        tempFile.outputStream().use { output ->
-                            input.copyTo(output)
-                        }
-                    }
-                    tempFile
-                } else {
-                    val path = identifier.removePrefix("file://")
-                    File(path)
-                }
+            when {
+                identifier.startsWith("file:///android_asset/") -> handleAssetFile(identifier)
+                identifier.startsWith("content://") -> handleContentUriFile(identifier.toUri())
+                else -> handleDirectFile(identifier)
             }
         } catch (_: Exception) {
             null
         }
+
+    private fun handleAssetFile(identifier: String): File {
+        val assetPath = identifier.removePrefix("file:///android_asset/")
+        val fileName = assetPath.substringAfterLast('/')
+        val tempFile = File(context.cacheDir, fileName)
+        context.assets.open(assetPath).use { input ->
+            tempFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+        return tempFile
+    }
+
+    private fun handleContentUriFile(uri: Uri): File {
+        val fileName = getFileNameFromContentUri(uri) ?: "document.pdf"
+        val tempFile = File(context.cacheDir, fileName)
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            tempFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+        return tempFile
+    }
+
+    private fun handleDirectFile(identifier: String): File {
+        val path = identifier.removePrefix("file://")
+        return File(path)
+    }
 
     private fun getFileNameFromContentUri(uri: Uri): String? =
         context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
@@ -91,8 +104,10 @@ internal class AndroidPdfPlatformActions(
         }
 
     override fun download(url: String) {
-        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val intent =
+            Intent(Intent.ACTION_VIEW, url.toUri()).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
         context.startActivity(intent)
     }
 }
