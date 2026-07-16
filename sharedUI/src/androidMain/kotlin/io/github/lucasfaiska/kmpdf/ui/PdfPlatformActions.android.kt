@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import io.github.lucasfaiska.kmpdf.model.PdfSource
 import java.io.File
 
@@ -60,7 +61,7 @@ internal class AndroidPdfPlatformActions(
                 }
                 tempFile
             } else {
-                val uri = Uri.parse(identifier)
+                val uri = identifier.toUri()
                 if (uri.scheme == "content") {
                     val fileName = getFileNameFromContentUri(uri) ?: "document.pdf"
                     val tempFile = File(context.cacheDir, fileName)
@@ -90,7 +91,7 @@ internal class AndroidPdfPlatformActions(
         }
 
     override fun download(url: String) {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
     }
