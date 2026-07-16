@@ -14,6 +14,8 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.github.lucasfaiska.kmpdf.model.PdfSource
 
@@ -165,14 +167,23 @@ private fun PdfContent(
     modifier: Modifier,
 ) {
     val document = state.document ?: return
+    var containerSize by remember { mutableStateOf(IntSize.Zero) }
 
     Box(
         modifier =
             modifier
+                .onSizeChanged { containerSize = it }
                 .pointerInput(Unit) {
-                    detectTransformGestures { _, _, zoom, _ ->
-                        state.updateZoom(zoom)
-                    }
+                    detectTransformGestures(
+                        onGesture = { _, pan, zoom, _ ->
+                            if (zoom != 1f) {
+                                state.updateZoom(zoom)
+                            }
+                            if (state.zoomScale > 1f) {
+                                state.updateOffset(pan, containerSize)
+                            }
+                        },
+                    )
                 }.pointerInput(Unit) {
                     detectTapGestures(
                         onDoubleTap = {
@@ -193,6 +204,8 @@ private fun PdfContent(
                     .graphicsLayer(
                         scaleX = state.zoomScale,
                         scaleY = state.zoomScale,
+                        translationX = state.offset.x,
+                        translationY = state.offset.y,
                     ),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),

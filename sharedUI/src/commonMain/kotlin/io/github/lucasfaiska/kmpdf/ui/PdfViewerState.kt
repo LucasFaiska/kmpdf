@@ -3,7 +3,9 @@ package io.github.lucasfaiska.kmpdf.ui
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.unit.IntSize
 import io.github.lucasfaiska.kmpdf.model.PdfDocument
 import io.github.lucasfaiska.kmpdf.model.PdfSource
 import io.github.lucasfaiska.kmpdf.repository.PdfRepository
@@ -48,6 +50,12 @@ internal class PdfViewerState internal constructor(
      * The current zoom level of the viewer.
      */
     var zoomScale by mutableFloatStateOf(1f)
+        private set
+
+    /**
+     * The current scroll offset of the zoomed page.
+     */
+    var offset by mutableStateOf(Offset.Zero)
         private set
 
     /**
@@ -120,6 +128,7 @@ internal class PdfViewerState internal constructor(
      */
     fun resetZoom() {
         zoomScale = 1f
+        offset = Offset.Zero
     }
 
     /**
@@ -129,6 +138,32 @@ internal class PdfViewerState internal constructor(
      */
     fun updateZoom(scale: Float) {
         zoomScale = max(1f, min(zoomScale * scale, 5f))
+        if (zoomScale == 1f) {
+            offset = Offset.Zero
+        }
+    }
+
+    /**
+     * Updates the scroll offset of the zoomed page.
+     *
+     * @param delta The amount to move the offset.
+     * @param containerSize The size of the container.
+     */
+    fun updateOffset(
+        delta: Offset,
+        containerSize: IntSize,
+    ) {
+        if (zoomScale > 1f) {
+            val maxOffsetX = (containerSize.width * (zoomScale - 1f)) / 2f
+            val maxOffsetY = (containerSize.height * (zoomScale - 1f)) / 2f
+
+            val newX = (offset.x + delta.x).coerceIn(-maxOffsetX, maxOffsetX)
+            val newY = (offset.y + delta.y).coerceIn(-maxOffsetY, maxOffsetY)
+
+            offset = Offset(newX, newY)
+        } else {
+            offset = Offset.Zero
+        }
     }
 
     @Composable

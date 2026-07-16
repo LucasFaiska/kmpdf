@@ -6,7 +6,7 @@ import io.github.lucasfaiska.kmpdf.model.PdfSource
 /**
  * Interface for platform-specific PDF actions like sharing and downloading.
  */
-internal interface PdfPlatformHelper {
+internal interface PdfPlatformActions {
     /**
      * Shares the current PDF document using the platform's native share sheet.
      */
@@ -19,4 +19,4 @@ internal interface PdfPlatformHelper {
 }
 
 @Composable
-internal expect fun rememberPdfPlatformHelper(): PdfPlatformHelper
+internal expect fun rememberPdfPlatformActions(): PdfPlatformActions

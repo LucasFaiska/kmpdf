@@ -118,14 +118,14 @@ fun ViewerScreen(
                 PdfViewer(
                     url = source.url,
                     modifier = modifier,
-                    showToolbar = true
+                    showToolbar = true,
                 )
 
             is PdfSource.Local ->
                 PdfViewer(
                     identifier = source.identifier,
                     modifier = modifier,
-                    showToolbar = true
+                    showToolbar = true,
                 )
         }
     }

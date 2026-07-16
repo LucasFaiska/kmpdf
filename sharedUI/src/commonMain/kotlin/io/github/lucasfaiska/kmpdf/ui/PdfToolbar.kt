@@ -20,7 +20,7 @@ internal fun PdfToolbar(
     source: PdfSource,
     modifier: Modifier = Modifier,
 ) {
-    val platformHelper = rememberPdfPlatformHelper()
+    val platformActions = rememberPdfPlatformActions()
 
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -67,11 +67,11 @@ internal fun PdfToolbar(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (source is PdfSource.Url) {
-                    IconButton(onClick = { platformHelper.download(source.url) }) {
-                        Icon(imageVector = Icons.Default.Info, contentDescription = "Download")
+                    IconButton(onClick = { platformActions.download(source.url) }) {
+                        Icon(imageVector = Icons.Default.Download, contentDescription = "Download")
                     }
                 }
-                IconButton(onClick = { platformHelper.share(source) }) {
+                IconButton(onClick = { platformActions.share(source) }) {
                     Icon(imageVector = Icons.Default.Share, contentDescription = "Compartilhar")
                 }
             }
