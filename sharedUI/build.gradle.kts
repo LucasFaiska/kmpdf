@@ -33,6 +33,7 @@ kotlin {
             api(libs.compose.resources)
             api(libs.compose.ui.tooling.preview)
             api(libs.compose.material3)
+            api("org.jetbrains.compose.material:material-icons-core:1.7.3")
             implementation(libs.ktor.client.core)
             api(project(":sharedLogic"))
         }

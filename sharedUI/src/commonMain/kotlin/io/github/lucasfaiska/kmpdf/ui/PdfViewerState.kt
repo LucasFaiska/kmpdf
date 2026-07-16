@@ -1,5 +1,7 @@
 package io.github.lucasfaiska.kmpdf.ui
 
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.ImageBitmap
 import io.github.lucasfaiska.kmpdf.model.PdfDocument
@@ -9,25 +11,66 @@ import io.github.lucasfaiska.kmpdf.ui.cache.PdfPageCache
 import io.github.lucasfaiska.kmpdf.ui.cache.PdfPageCacheImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlin.math.max
+import kotlin.math.min
 
+/**
+ * State object for the [PdfViewer] component.
+ * Manages document loading, page scrolling, and zoom level.
+ *
+ * @property lazyListState The state of the scrollable list of pages.
+ */
 @Stable
-class PdfViewerState internal constructor(
+internal class PdfViewerState internal constructor(
     private val cache: PdfPageCache,
     private val coroutineScope: CoroutineScope,
+    val lazyListState: LazyListState = LazyListState(),
 ) {
+    /**
+     * The currently loaded PDF document.
+     */
     var document by mutableStateOf<PdfDocument?>(null)
         private set
 
+    /**
+     * Whether the document is currently loading.
+     */
     var loading by mutableStateOf(false)
         private set
 
+    /**
+     * The error that occurred while loading the document, if any.
+     */
     var error by mutableStateOf<Throwable?>(null)
         private set
+
+    /**
+     * The current zoom level of the viewer.
+     */
+    var zoomScale by mutableFloatStateOf(1f)
+        private set
+
+    /**
+     * The current visible page number (1-based).
+     */
+    val currentPage: Int
+        get() = lazyListState.firstVisibleItemIndex + 1
+
+    /**
+     * The total number of pages in the document.
+     */
+    val pageCount: Int
+        get() = document?.pageCount ?: 0
+
+    private var currentSource: PdfSource? = null
 
     internal fun load(
         source: PdfSource,
         repository: PdfRepository,
     ) {
+        if (currentSource == source && (loading || document != null)) return
+
+        currentSource = source
         loading = true
         error = null
         coroutineScope.launch {
@@ -36,12 +79,56 @@ class PdfViewerState internal constructor(
                 document?.close()
                 document = newDocument
                 cache.clear()
+                zoomScale = 1f
             } catch (e: Exception) {
                 error = e
+                currentSource = null
             } finally {
                 loading = false
             }
         }
+    }
+
+    /**
+     * Scrolls to a specific page.
+     *
+     * @param index The 0-based index of the page.
+     */
+    fun scrollToPage(index: Int) {
+        val target = max(0, min(index, pageCount - 1))
+        coroutineScope.launch {
+            lazyListState.animateScrollToItem(target)
+        }
+    }
+
+    /**
+     * Increases the zoom level.
+     */
+    fun zoomIn() {
+        zoomScale = min(zoomScale + 0.25f, 5f)
+    }
+
+    /**
+     * Decreases the zoom level.
+     */
+    fun zoomOut() {
+        zoomScale = max(zoomScale - 0.25f, 1f)
+    }
+
+    /**
+     * Resets the zoom level to 1x.
+     */
+    fun resetZoom() {
+        zoomScale = 1f
+    }
+
+    /**
+     * Updates the zoom level by a multiplier.
+     *
+     * @param scale The multiplier to apply to the current zoom level.
+     */
+    fun updateZoom(scale: Float) {
+        zoomScale = max(1f, min(zoomScale * scale, 5f))
     }
 
     @Composable
@@ -50,6 +137,8 @@ class PdfViewerState internal constructor(
         width: Int,
         height: Int,
     ): ImageBitmap? {
+        if (width <= 0 || height <= 0) return null
+
         val cached = cache.get(index)
         if (cached != null) return cached
 
@@ -69,6 +158,9 @@ class PdfViewerState internal constructor(
         return null
     }
 
+    /**
+     * Closes the document and clears the cache.
+     */
     fun close() {
         document?.close()
         document = null
@@ -76,14 +168,23 @@ class PdfViewerState internal constructor(
     }
 }
 
+/**
+ * Creates and remembers a [PdfViewerState] instance.
+ *
+ * @param cacheSize The maximum number of pages to keep in memory.
+ * @param lazyListState The state of the scrollable list.
+ */
 @Composable
-fun rememberPdfViewerState(cacheSize: Int = 15): PdfViewerState {
+internal fun rememberPdfViewerState(
+    cacheSize: Int = 15,
+    lazyListState: LazyListState = rememberLazyListState(),
+): PdfViewerState {
     val scope = rememberCoroutineScope()
     val cache = remember(cacheSize) { PdfPageCacheImpl(cacheSize) }
 
     val state =
-        remember(cache, scope) {
-            PdfViewerState(cache, scope)
+        remember(cache, scope, lazyListState) {
+            PdfViewerState(cache, scope, lazyListState)
         }
 
     DisposableEffect(state) {

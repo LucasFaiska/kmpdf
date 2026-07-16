@@ -8,13 +8,12 @@ import io.github.lucasfaiska.kmpdf.model.PdfDocument
 import io.github.lucasfaiska.kmpdf.model.PdfSource
 import io.github.lucasfaiska.kmpdf.repository.PdfRepository
 import io.github.lucasfaiska.kmpdf.ui.PdfViewer
-import io.github.lucasfaiska.kmpdf.ui.rememberPdfViewerState
 
 @Preview(showBackground = true)
 @Composable
 fun PdfViewerPreview() {
     PdfViewer(
-        source = PdfSource.Url("https://example.com/sample.pdf"),
+        url = "https://example.com/sample.pdf",
         modifier = Modifier.fillMaxSize(),
     )
 }
@@ -22,12 +21,10 @@ fun PdfViewerPreview() {
 @Preview(showBackground = true)
 @Composable
 fun PdfViewerLoadingPreview() {
-    val state = rememberPdfViewerState()
-
     PdfViewer(
-        source = PdfSource.Url("https://example.com/sample.pdf"),
-        state = state,
+        url = "https://example.com/sample.pdf",
         modifier = Modifier.fillMaxSize(),
+        showToolbar = true,
     )
 }
 
