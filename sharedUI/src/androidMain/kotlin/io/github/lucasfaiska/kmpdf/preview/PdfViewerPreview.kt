@@ -29,5 +29,8 @@ fun PdfViewerLoadingPreview() {
 }
 
 private class MockPdfRepository : PdfRepository {
-    override suspend fun loadDocument(source: PdfSource): PdfDocument = throw NotImplementedError()
+    override suspend fun loadDocument(
+        source: PdfSource,
+        password: String?,
+    ): PdfDocument = throw NotImplementedError()
 }

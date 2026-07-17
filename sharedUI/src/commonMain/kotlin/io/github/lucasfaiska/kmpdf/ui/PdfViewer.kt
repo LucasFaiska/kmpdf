@@ -5,8 +5,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,8 +14,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import io.github.lucasfaiska.kmpdf.model.PdfError
 import io.github.lucasfaiska.kmpdf.model.PdfSource
 
 /**
@@ -33,7 +34,7 @@ fun PdfViewer(
     url: String,
     modifier: Modifier = Modifier,
     loadingContent: @Composable () -> Unit = { DefaultLoadingContent() },
-    errorContent: @Composable (Throwable) -> Unit = {},
+    errorContent: @Composable (PdfError) -> Unit = {},
     showToolbar: Boolean = false,
 ) {
     val state = rememberPdfViewerState()
@@ -62,7 +63,7 @@ fun PdfViewer(
     modifier: Modifier = Modifier,
     identifier: String,
     loadingContent: @Composable () -> Unit = { DefaultLoadingContent() },
-    errorContent: @Composable (Throwable) -> Unit = {},
+    errorContent: @Composable (PdfError) -> Unit = {},
     showToolbar: Boolean = false,
 ) {
     val state = rememberPdfViewerState()
@@ -91,7 +92,7 @@ fun PdfViewer(
     source: PdfSource,
     modifier: Modifier = Modifier,
     loadingContent: @Composable () -> Unit = { DefaultLoadingContent() },
-    errorContent: @Composable (Throwable) -> Unit = {},
+    errorContent: @Composable (PdfError) -> Unit = {},
     showToolbar: Boolean = false,
 ) {
     val state = rememberPdfViewerState()
@@ -113,12 +114,21 @@ private fun PdfViewerCore(
     state: PdfViewerState,
     showToolbar: Boolean,
     loadingContent: @Composable () -> Unit,
-    errorContent: @Composable (Throwable) -> Unit,
+    errorContent: @Composable (PdfError) -> Unit,
 ) {
     val repository = rememberPdfRepository()
 
     LaunchedEffect(source, repository) {
         state.load(source, repository)
+    }
+
+    if (state.isPasswordRequired || state.isPasswordInvalid) {
+        DefaultPasswordDialog(
+            isInvalid = state.isPasswordInvalid,
+            onConfirm = { password ->
+                state.unlock(password, repository)
+            },
+        )
     }
 
     Scaffold(
@@ -154,6 +164,51 @@ private fun PdfViewerCore(
             }
         }
     }
+}
+
+@Composable
+private fun DefaultPasswordDialog(
+    isInvalid: Boolean,
+    onConfirm: (String) -> Unit,
+) {
+    var password by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = {},
+        title = { Text("Password Required") },
+        text = {
+            Column {
+                val message =
+                    if (isInvalid) {
+                        "Incorrect password. Please try again."
+                    } else {
+                        "This document is protected. Please enter the password."
+                    }
+                Text(
+                    message,
+                    color = if (isInvalid) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                TextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Password") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true,
+                    isError = isInvalid,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(password) },
+                enabled = password.isNotBlank(),
+            ) {
+                Text("Open")
+            }
+        },
+    )
 }
 
 @Composable
