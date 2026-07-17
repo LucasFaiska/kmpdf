@@ -9,12 +9,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PdfViewerStateTest {
@@ -41,12 +36,65 @@ class PdfViewerStateTest {
     }
 
     @Test
-    fun `given a new state when created then it should be empty`() {
+    fun `given a new state when created then it should be empty and have default zoom`() {
         val state = PdfViewerState(PdfPageCacheImpl(5), testScope)
 
         assertNull(state.document)
         assertFalse(state.loading)
         assertNull(state.error)
+        assertEquals(1f, state.zoomScale)
+        assertEquals(1, state.currentPage)
+    }
+
+    @Test
+    fun `given state when zooming in then zoomScale should increase`() {
+        val state = PdfViewerState(PdfPageCacheImpl(5), testScope)
+
+        state.zoomIn()
+        assertEquals(1.25f, state.zoomScale)
+
+        state.zoomIn()
+        assertEquals(1.5f, state.zoomScale)
+    }
+
+    @Test
+    fun `given state when zooming out then zoomScale should decrease but not below 1`() {
+        val state = PdfViewerState(PdfPageCacheImpl(5), testScope)
+
+        state.zoomIn()
+        state.zoomIn()
+        assertEquals(1.5f, state.zoomScale)
+
+        state.zoomOut()
+        assertEquals(1.25f, state.zoomScale)
+
+        state.zoomOut()
+        assertEquals(1.0f, state.zoomScale)
+
+        state.zoomOut()
+        assertEquals(1.0f, state.zoomScale)
+    }
+
+    @Test
+    fun `given state when resetting zoom then zoomScale should be 1`() {
+        val state = PdfViewerState(PdfPageCacheImpl(5), testScope)
+
+        state.zoomIn()
+        state.zoomIn()
+        state.resetZoom()
+
+        assertEquals(1.0f, state.zoomScale)
+    }
+
+    @Test
+    fun `given state when updating zoom with scale then zoomScale should multiply`() {
+        val state = PdfViewerState(PdfPageCacheImpl(5), testScope)
+
+        state.updateZoom(2.0f)
+        assertEquals(2.0f, state.zoomScale)
+
+        state.updateZoom(0.5f)
+        assertEquals(1.0f, state.zoomScale)
     }
 
     @Test
