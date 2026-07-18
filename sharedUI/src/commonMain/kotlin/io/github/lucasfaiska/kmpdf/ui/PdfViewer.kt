@@ -9,6 +9,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -172,6 +174,11 @@ private fun DefaultPasswordDialog(
     onConfirm: (String) -> Unit,
 ) {
     var password by remember { mutableStateOf("") }
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
 
     AlertDialog(
         onDismissRequest = {},
@@ -196,7 +203,10 @@ private fun DefaultPasswordDialog(
                     visualTransformation = PasswordVisualTransformation(),
                     singleLine = true,
                     isError = isInvalid,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester),
                 )
             }
         },

@@ -7,10 +7,7 @@ import android.graphics.pdf.PdfRendererPreV
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.os.ext.SdkExtensions
-import io.github.lucasfaiska.kmpdf.model.AndroidPdfDocument
-import io.github.lucasfaiska.kmpdf.model.PdfError
-import io.github.lucasfaiska.kmpdf.model.PdfErrorType
-import io.github.lucasfaiska.kmpdf.model.PdfLoadStatus
+import io.github.lucasfaiska.kmpdf.model.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -36,15 +33,15 @@ class AndroidPdfReader(
                 val pfd = ParcelFileDescriptor.open(tempFile, ParcelFileDescriptor.MODE_READ_ONLY)
 
                 try {
-                    val document =
+                    val engine =
                         when {
                             Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM -> {
-                                openWithModernRenderer(pfd, password, tempFile)
+                                createModernEngine(pfd, password)
                             }
 
                             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
                                 SdkExtensions.getExtensionVersion(Build.VERSION_CODES.S) >= 13 -> {
-                                openWithCompatRenderer(pfd, password, tempFile)
+                                createCompatEngine(pfd, password)
                             }
 
                             else -> {
@@ -57,11 +54,10 @@ class AndroidPdfReader(
                                         ),
                                     )
                                 }
-                                val renderer = PdfRenderer(pfd)
-                                AndroidPdfDocument(renderer, tempFile, dispatcher)
+                                ModernPdfEngine(PdfRenderer(pfd))
                             }
                         }
-                    PdfLoadStatus.Success(document)
+                    PdfLoadStatus.Success(AndroidPdfDocument(engine, tempFile, dispatcher))
                 } catch (e: SecurityException) {
                     pfd.close()
                     PdfLoadStatus.InvalidPassword
@@ -78,11 +74,10 @@ class AndroidPdfReader(
             }
         }
 
-    private fun openWithModernRenderer(
+    private fun createModernEngine(
         pfd: ParcelFileDescriptor,
         password: String?,
-        tempFile: File,
-    ): AndroidPdfDocument {
+    ): AndroidPdfEngine {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             val renderer =
                 if (password != null) {
@@ -91,17 +86,16 @@ class AndroidPdfReader(
                 } else {
                     PdfRenderer(pfd)
                 }
-            return AndroidPdfDocument(renderer, tempFile, dispatcher)
+            return ModernPdfEngine(renderer)
         } else {
             throw IllegalStateException("Modern renderer requires API 35+")
         }
     }
 
-    private fun openWithCompatRenderer(
+    private fun createCompatEngine(
         pfd: ParcelFileDescriptor,
         password: String?,
-        tempFile: File,
-    ): AndroidPdfDocument {
+    ): AndroidPdfEngine {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
             SdkExtensions.getExtensionVersion(Build.VERSION_CODES.S) >= 13
         ) {
@@ -116,7 +110,7 @@ class AndroidPdfReader(
                 } else {
                     PdfRendererPreV(pfd)
                 }
-            return AndroidPdfDocument(renderer, tempFile, dispatcher)
+            return CompatPdfEngine(renderer)
         } else {
             throw IllegalStateException("Compat renderer requires S Extension 13")
         }
