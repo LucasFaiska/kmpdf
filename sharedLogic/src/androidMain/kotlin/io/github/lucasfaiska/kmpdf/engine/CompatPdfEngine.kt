@@ -1,17 +1,28 @@
 package io.github.lucasfaiska.kmpdf.engine
 
 import android.graphics.Bitmap
+import android.graphics.pdf.LoadParams
 import android.graphics.pdf.PdfRendererPreV
 import android.graphics.pdf.RenderParams
 import android.os.Build
+import android.os.ParcelFileDescriptor
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresExtension
 
 @RequiresApi(Build.VERSION_CODES.R)
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 13)
 internal class CompatPdfEngine(
-    private val renderer: PdfRendererPreV,
+    pfd: ParcelFileDescriptor,
+    password: String?,
 ) : AndroidPdfEngine {
+    private val renderer: PdfRendererPreV =
+        if (password != null) {
+            val params = LoadParams.Builder().setPassword(password).build()
+            PdfRendererPreV(pfd, params)
+        } else {
+            PdfRendererPreV(pfd)
+        }
+
     override val pageCount: Int get() = renderer.pageCount
 
     override fun openPage(index: Int): AndroidPdfEnginePage = CompatPdfEnginePage(renderer.openPage(index))
