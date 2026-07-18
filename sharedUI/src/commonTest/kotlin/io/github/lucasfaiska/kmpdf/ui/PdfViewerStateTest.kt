@@ -32,13 +32,13 @@ class PdfViewerStateTest {
         override suspend fun loadDocument(
             source: PdfSource,
             password: String?,
-        ): PdfDocument {
+        ): PdfLoadStatus {
             loadCalled = true
             lastPasswordUsed = password
-            if (shouldFail) throw Exception("Load Error")
-            if (requiredPassword && password == null) throw PdfPasswordRequiredException()
-            if (requiredPassword && password != "correct") throw PdfInvalidPasswordException()
-            return MockPdfDocument()
+            if (shouldFail) return PdfLoadStatus.Error(PdfErrorType.GENERIC)
+            if (requiredPassword && password == null) return PdfLoadStatus.PasswordRequired
+            if (requiredPassword && password != "correct") return PdfLoadStatus.InvalidPassword
+            return PdfLoadStatus.Success(MockPdfDocument())
         }
     }
 
@@ -132,7 +132,7 @@ class PdfViewerStateTest {
             assertFalse(state.loading)
             assertNull(state.document)
             assertNotNull(state.error)
-            assertEquals("Load Error", state.error?.message)
+            assertEquals("GENERIC", state.error?.message)
         }
 
     @Test

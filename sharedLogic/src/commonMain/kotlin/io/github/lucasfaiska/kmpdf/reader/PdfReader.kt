@@ -1,8 +1,6 @@
 package io.github.lucasfaiska.kmpdf.reader
 
-import io.github.lucasfaiska.kmpdf.model.PdfDocument
-import io.github.lucasfaiska.kmpdf.model.PdfInvalidPasswordException
-import io.github.lucasfaiska.kmpdf.model.PdfPasswordRequiredException
+import io.github.lucasfaiska.kmpdf.model.PdfLoadStatus
 
 interface PdfReader {
     /**
@@ -10,9 +8,10 @@ interface PdfReader {
      *
      * @param bytes The byte array containing the PDF document data.
      * @param password An optional password for encrypted documents.
-     * @return A [PdfDocument] instance.
-     * @throws PdfPasswordRequiredException if the document is protected and no password was provided.
-     * @throws PdfInvalidPasswordException if the provided password is incorrect.
+     * @return A [PdfLoadStatus] instance.
      */
-    suspend fun open(bytes: ByteArray, password: String? = null): PdfDocument
+    suspend fun open(
+        bytes: ByteArray,
+        password: String? = null,
+    ): PdfLoadStatus
 }

@@ -9,6 +9,7 @@ kotlin {
     android {
         namespace = "io.github.lucasfaiska.kmpdf.logic"
         compileSdk = 36
+        compileSdkExtension = 19
         minSdk = 23
 
         compilerOptions {
@@ -36,6 +37,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.android)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.androidx.core.ktx)
+            implementation(libs.androidx.pdf.viewer)
         }
 
         getByName("androidHostTest") {

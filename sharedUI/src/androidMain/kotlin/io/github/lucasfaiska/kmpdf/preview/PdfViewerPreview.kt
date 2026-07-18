@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import io.github.lucasfaiska.kmpdf.model.PdfDocument
+import io.github.lucasfaiska.kmpdf.model.PdfLoadStatus
 import io.github.lucasfaiska.kmpdf.model.PdfSource
 import io.github.lucasfaiska.kmpdf.repository.PdfRepository
 import io.github.lucasfaiska.kmpdf.ui.PdfViewer
@@ -32,5 +32,5 @@ private class MockPdfRepository : PdfRepository {
     override suspend fun loadDocument(
         source: PdfSource,
         password: String?,
-    ): PdfDocument = throw NotImplementedError()
+    ): PdfLoadStatus = throw NotImplementedError()
 }
