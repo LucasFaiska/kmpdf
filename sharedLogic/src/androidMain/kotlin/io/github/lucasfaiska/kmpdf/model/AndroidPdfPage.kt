@@ -14,7 +14,6 @@ internal class AndroidPdfPage(
     private val dispatcher: CoroutineDispatcher,
     private val mutex: Mutex,
 ) : PdfPage {
-
     override val width: Int get() = engine.width(index)
     override val height: Int get() = engine.height(index)
 

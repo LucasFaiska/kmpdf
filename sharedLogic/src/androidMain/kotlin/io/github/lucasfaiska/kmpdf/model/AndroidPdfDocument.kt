@@ -3,7 +3,6 @@ package io.github.lucasfaiska.kmpdf.model
 import io.github.lucasfaiska.kmpdf.engine.AndroidPdfEngine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import java.io.File
 
 internal class AndroidPdfDocument(
@@ -15,9 +14,7 @@ internal class AndroidPdfDocument(
 
     override val pageCount: Int = engine.pageCount
 
-    override fun getPage(index: Int): PdfPage {
-        return AndroidPdfPage(engine, index, dispatcher, mutex)
-    }
+    override fun getPage(index: Int): PdfPage = AndroidPdfPage(engine, index, dispatcher, mutex)
 
     override fun close() {
         engine.close()

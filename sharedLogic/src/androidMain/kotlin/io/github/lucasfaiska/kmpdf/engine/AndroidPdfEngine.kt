@@ -8,6 +8,7 @@ internal interface AndroidPdfEngine {
     fun openPage(index: Int): AndroidPdfEnginePage
 
     fun width(index: Int): Int
+
     fun height(index: Int): Int
 
     fun close()

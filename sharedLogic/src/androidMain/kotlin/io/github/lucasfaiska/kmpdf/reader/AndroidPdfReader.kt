@@ -26,7 +26,7 @@ class AndroidPdfReader(
                 try {
                     val engine = AndroidPdfEngineProvider.provideEngine(pfd, password)
                     PdfLoadStatus.Success(AndroidPdfDocument(engine, tempFile, dispatcher))
-                } catch (e: SecurityException) {
+                } catch (_: SecurityException) {
                     pfd.close()
                     if (password == null) PdfLoadStatus.PasswordRequired else PdfLoadStatus.InvalidPassword
                 } catch (e: Exception) {
@@ -38,16 +38,6 @@ class AndroidPdfReader(
                 PdfLoadStatus.Error(PdfError(PdfErrorType.IO_ERROR, e.message, e))
             }
         }
-
-    private fun isEncrypted(bytes: ByteArray): Boolean {
-        val content = bytes.decodeToString(endIndex = minOf(bytes.size, 1024))
-        return content.contains("/Encrypt") ||
-            bytes
-                .takeLast(1024)
-                .toByteArray()
-                .decodeToString()
-                .contains("/Encrypt")
-    }
 
     private companion object {
         private const val TEMP_FILE_PREFIX = "kmpdf_"
