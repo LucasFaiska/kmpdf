@@ -51,6 +51,7 @@ fun SelectionScreen(onSourceSelected: (PdfSource) -> Unit) {
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.OpenDocument(),
         ) { uri ->
+            println("kmpdf DEBUG: Selected URI: $uri")
             uri?.let { onSourceSelected(PdfSource.Local(it.toString())) }
         }
 

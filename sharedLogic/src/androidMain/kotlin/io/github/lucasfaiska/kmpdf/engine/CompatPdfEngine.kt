@@ -27,6 +27,9 @@ internal class CompatPdfEngine(
 
     override fun openPage(index: Int): AndroidPdfEnginePage = CompatPdfEnginePage(renderer.openPage(index))
 
+    override fun width(index: Int): Int = renderer.openPage(index).use { it.width }
+    override fun height(index: Int): Int = renderer.openPage(index).use { it.height }
+
     override fun close() = renderer.close()
 }
 
