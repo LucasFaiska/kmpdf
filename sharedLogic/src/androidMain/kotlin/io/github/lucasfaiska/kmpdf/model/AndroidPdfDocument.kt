@@ -1,5 +1,6 @@
 package io.github.lucasfaiska.kmpdf.model
 
+import io.github.lucasfaiska.kmpdf.engine.AndroidPdfEngine
 import kotlinx.coroutines.CoroutineDispatcher
 import java.io.File
 

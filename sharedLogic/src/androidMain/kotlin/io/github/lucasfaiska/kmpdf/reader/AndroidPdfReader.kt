@@ -2,6 +2,7 @@ package io.github.lucasfaiska.kmpdf.reader
 
 import android.content.Context
 import android.os.ParcelFileDescriptor
+import io.github.lucasfaiska.kmpdf.engine.AndroidPdfEngine
 import io.github.lucasfaiska.kmpdf.model.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext

@@ -1,4 +1,4 @@
-package io.github.lucasfaiska.kmpdf.model
+package io.github.lucasfaiska.kmpdf.engine
 
 import android.graphics.Bitmap
 import android.graphics.pdf.LoadParams

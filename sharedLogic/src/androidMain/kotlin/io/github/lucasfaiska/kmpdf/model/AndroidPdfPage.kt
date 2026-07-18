@@ -1,6 +1,7 @@
 package io.github.lucasfaiska.kmpdf.model
 
 import androidx.core.graphics.createBitmap
+import io.github.lucasfaiska.kmpdf.engine.AndroidPdfEnginePage
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.nio.ByteBuffer
