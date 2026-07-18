@@ -8,6 +8,7 @@ plugins {
 android {
     namespace = "io.github.lucasfaiska.kmpdf.androidApp"
     compileSdk = 36
+    compileSdkExtension = 19
 
     defaultConfig {
         minSdk = 23
