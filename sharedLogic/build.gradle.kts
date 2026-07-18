@@ -10,7 +10,7 @@ kotlin {
         namespace = "io.github.lucasfaiska.kmpdf.logic"
         compileSdk = 36
         compileSdkExtension = 19
-        minSdk = 23
+        minSdk = 28
 
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)

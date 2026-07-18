@@ -11,7 +11,7 @@ android {
     compileSdkExtension = 19
 
     defaultConfig {
-        minSdk = 23
+        minSdk = 28
         targetSdk = 36
 
         applicationId = "io.github.lucasfaiska.kmpdf.androidApp"
