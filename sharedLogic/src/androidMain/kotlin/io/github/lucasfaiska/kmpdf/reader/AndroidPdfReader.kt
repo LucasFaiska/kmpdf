@@ -6,6 +6,7 @@ import android.graphics.pdf.PdfRenderer
 import android.graphics.pdf.PdfRendererPreV
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.os.ext.SdkExtensions
 import io.github.lucasfaiska.kmpdf.model.AndroidPdfDocument
 import io.github.lucasfaiska.kmpdf.model.PdfError
 import io.github.lucasfaiska.kmpdf.model.PdfErrorType
@@ -36,10 +37,29 @@ class AndroidPdfReader(
 
                 try {
                     val document =
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-                            openWithModernRenderer(pfd, password, tempFile)
-                        } else {
-                            openWithCompatRenderer(pfd, password, tempFile)
+                        when {
+                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM -> {
+                                openWithModernRenderer(pfd, password, tempFile)
+                            }
+
+                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+                                SdkExtensions.getExtensionVersion(Build.VERSION_CODES.S) >= 13 -> {
+                                openWithCompatRenderer(pfd, password, tempFile)
+                            }
+
+                            else -> {
+                                if (password != null) {
+                                    pfd.close()
+                                    return@withContext PdfLoadStatus.Error(
+                                        PdfError(
+                                            PdfErrorType.UNSUPPORTED,
+                                            "Password protected PDFs are not supported on this device version.",
+                                        ),
+                                    )
+                                }
+                                val renderer = PdfRenderer(pfd)
+                                AndroidPdfDocument(renderer, tempFile, dispatcher)
+                            }
                         }
                     PdfLoadStatus.Success(document)
                 } catch (e: SecurityException) {
@@ -63,14 +83,18 @@ class AndroidPdfReader(
         password: String?,
         tempFile: File,
     ): AndroidPdfDocument {
-        val renderer =
-            if (password != null) {
-                val params = LoadParams.Builder().setPassword(password).build()
-                PdfRenderer(pfd, params)
-            } else {
-                PdfRenderer(pfd)
-            }
-        return AndroidPdfDocument(renderer, tempFile, dispatcher)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            val renderer =
+                if (password != null) {
+                    val params = LoadParams.Builder().setPassword(password).build()
+                    PdfRenderer(pfd, params)
+                } else {
+                    PdfRenderer(pfd)
+                }
+            return AndroidPdfDocument(renderer, tempFile, dispatcher)
+        } else {
+            throw IllegalStateException("Modern renderer requires API 35+")
+        }
     }
 
     private fun openWithCompatRenderer(
@@ -78,18 +102,24 @@ class AndroidPdfReader(
         password: String?,
         tempFile: File,
     ): AndroidPdfDocument {
-        val renderer =
-            if (password != null) {
-                val params =
-                    android.graphics.pdf.LoadParams
-                        .Builder()
-                        .setPassword(password)
-                        .build()
-                PdfRendererPreV(pfd, params)
-            } else {
-                PdfRendererPreV(pfd)
-            }
-        return AndroidPdfDocument(renderer, tempFile, dispatcher)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+            SdkExtensions.getExtensionVersion(Build.VERSION_CODES.S) >= 13
+        ) {
+            val renderer =
+                if (password != null) {
+                    val params =
+                        LoadParams
+                            .Builder()
+                            .setPassword(password)
+                            .build()
+                    PdfRendererPreV(pfd, params)
+                } else {
+                    PdfRendererPreV(pfd)
+                }
+            return AndroidPdfDocument(renderer, tempFile, dispatcher)
+        } else {
+            throw IllegalStateException("Compat renderer requires S Extension 13")
+        }
     }
 
     private fun isEncrypted(bytes: ByteArray): Boolean {
