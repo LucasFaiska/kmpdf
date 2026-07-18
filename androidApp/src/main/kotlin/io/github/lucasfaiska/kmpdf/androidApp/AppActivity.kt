@@ -142,7 +142,6 @@ fun ViewerScreen(
                     errorContent = { error ->
                         Text("Error: ${error.type} - ${error.message}", color = MaterialTheme.colorScheme.error)
                     },
-                    showToolbar = true
                 )
 
             is PdfSource.Local ->
@@ -153,7 +152,6 @@ fun ViewerScreen(
                     errorContent = { error ->
                         Text("Error: ${error.type} - ${error.message}", color = MaterialTheme.colorScheme.error)
                     },
-                    showToolbar = true
                 )
         }
     }
