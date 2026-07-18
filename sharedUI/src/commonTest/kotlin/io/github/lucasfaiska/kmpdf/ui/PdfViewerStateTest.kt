@@ -35,7 +35,7 @@ class PdfViewerStateTest {
         ): PdfLoadStatus {
             loadCalled = true
             lastPasswordUsed = password
-            if (shouldFail) return PdfLoadStatus.Error(PdfErrorType.GENERIC)
+            if (shouldFail) return PdfLoadStatus.Error(PdfError(PdfErrorType.GENERIC))
             if (requiredPassword && password == null) return PdfLoadStatus.PasswordRequired
             if (requiredPassword && password != "correct") return PdfLoadStatus.InvalidPassword
             return PdfLoadStatus.Success(MockPdfDocument())
@@ -132,7 +132,7 @@ class PdfViewerStateTest {
             assertFalse(state.loading)
             assertNull(state.document)
             assertNotNull(state.error)
-            assertEquals("GENERIC", state.error?.message)
+            assertEquals(PdfErrorType.GENERIC, state.error?.type)
         }
 
     @Test

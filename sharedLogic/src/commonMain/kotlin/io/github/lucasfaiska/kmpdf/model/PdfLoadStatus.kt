@@ -21,13 +21,8 @@ sealed class PdfLoadStatus {
      */
     object InvalidPassword : PdfLoadStatus()
 
-    /**
-     * An error occurred while loading the PDF.
-     *
-     * @property type The specific category of the error.
-     */
     data class Error(
-        val type: PdfErrorType,
+        val error: PdfError,
     ) : PdfLoadStatus()
 }
 

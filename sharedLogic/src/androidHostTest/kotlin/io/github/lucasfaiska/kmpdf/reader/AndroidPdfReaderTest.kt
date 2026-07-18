@@ -24,7 +24,7 @@ class AndroidPdfReaderTest {
             val status = reader.open(minimalPdfBytes)
 
             if (status is PdfLoadStatus.Error) {
-                 println("Load Error: ${status.type}")
+                println("Load Error: ${status.error.type}")
             }
             assertTrue("Expected Success but got $status", status is PdfLoadStatus.Success)
             val document = (status as PdfLoadStatus.Success).document

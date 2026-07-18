@@ -7,6 +7,7 @@ import android.graphics.pdf.PdfRendererPreV
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import io.github.lucasfaiska.kmpdf.model.AndroidPdfDocument
+import io.github.lucasfaiska.kmpdf.model.PdfError
 import io.github.lucasfaiska.kmpdf.model.PdfErrorType
 import io.github.lucasfaiska.kmpdf.model.PdfLoadStatus
 import kotlinx.coroutines.CoroutineDispatcher
@@ -46,14 +47,14 @@ class AndroidPdfReader(
                     PdfLoadStatus.InvalidPassword
                 } catch (e: IOException) {
                     pfd.close()
-                    PdfLoadStatus.Error(PdfErrorType.IO_ERROR)
+                    PdfLoadStatus.Error(PdfError(PdfErrorType.IO_ERROR, e.message, e))
                 } catch (e: Exception) {
                     pfd.close()
-                    PdfLoadStatus.Error(PdfErrorType.GENERIC)
+                    PdfLoadStatus.Error(PdfError(PdfErrorType.GENERIC, e.message, e))
                 }
             } catch (e: Exception) {
                 if (tempFile.exists()) tempFile.delete()
-                PdfLoadStatus.Error(PdfErrorType.IO_ERROR)
+                PdfLoadStatus.Error(PdfError(PdfErrorType.IO_ERROR, e.message, e))
             }
         }
 
@@ -79,7 +80,9 @@ class AndroidPdfReader(
     ): AndroidPdfDocument {
         val renderer =
             if (password != null) {
-                val params = android.graphics.pdf.LoadParams.Builder()
+                val params =
+                    android.graphics.pdf.LoadParams
+                        .Builder()
                         .setPassword(password)
                         .build()
                 PdfRendererPreV(pfd, params)

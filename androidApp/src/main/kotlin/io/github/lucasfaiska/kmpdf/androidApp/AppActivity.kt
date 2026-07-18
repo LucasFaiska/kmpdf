@@ -49,7 +49,7 @@ fun SampleApp() {
 fun SelectionScreen(onSourceSelected: (PdfSource) -> Unit) {
     val launcher =
         rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.GetContent(),
+            contract = ActivityResultContracts.OpenDocument(),
         ) { uri ->
             uri?.let { onSourceSelected(PdfSource.Local(it.toString())) }
         }
@@ -96,7 +96,7 @@ fun SelectionScreen(onSourceSelected: (PdfSource) -> Unit) {
         }
 
         Button(
-            onClick = { launcher.launch("application/pdf") },
+            onClick = { launcher.launch(arrayOf("application/pdf")) },
             modifier =
                 Modifier
                     .fillMaxWidth(0.7f)
@@ -138,6 +138,9 @@ fun ViewerScreen(
                     url = source.url,
                     modifier = modifier,
                     showToolbar = true,
+                    errorContent = { error ->
+                        Text("Error: ${error.type} - ${error.message}", color = MaterialTheme.colorScheme.error)
+                    },
                 )
 
             is PdfSource.Local ->
@@ -145,6 +148,9 @@ fun ViewerScreen(
                     identifier = source.identifier,
                     modifier = modifier,
                     showToolbar = true,
+                    errorContent = { error ->
+                        Text("Error: ${error.type} - ${error.message}", color = MaterialTheme.colorScheme.error)
+                    },
                 )
         }
     }
