@@ -51,7 +51,6 @@ fun SelectionScreen(onSourceSelected: (PdfSource) -> Unit) {
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.OpenDocument(),
         ) { uri ->
-            println("kmpdf DEBUG: Selected URI: $uri")
             uri?.let { onSourceSelected(PdfSource.Local(it.toString())) }
         }
 
@@ -139,9 +138,6 @@ fun ViewerScreen(
                     url = source.url,
                     modifier = modifier,
                     showToolbar = true,
-                    errorContent = { error ->
-                        Text("Error: ${error.type} - ${error.message}", color = MaterialTheme.colorScheme.error)
-                    },
                 )
 
             is PdfSource.Local ->
@@ -149,9 +145,6 @@ fun ViewerScreen(
                     identifier = source.identifier,
                     modifier = modifier,
                     showToolbar = true,
-                    errorContent = { error ->
-                        Text("Error: ${error.type} - ${error.message}", color = MaterialTheme.colorScheme.error)
-                    },
                 )
         }
     }
