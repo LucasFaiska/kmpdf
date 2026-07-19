@@ -3,7 +3,9 @@ package io.github.lucasfaiska.kmpdf.androidApp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -45,6 +47,13 @@ fun SampleApp() {
 
 @Composable
 fun SelectionScreen(onSourceSelected: (PdfSource) -> Unit) {
+    val launcher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument(),
+        ) { uri ->
+            uri?.let { onSourceSelected(PdfSource.Local(it.toString())) }
+        }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -84,6 +93,16 @@ fun SelectionScreen(onSourceSelected: (PdfSource) -> Unit) {
                     .padding(8.dp),
         ) {
             Text("Load from Assets (Local)")
+        }
+
+        Button(
+            onClick = { launcher.launch(arrayOf("application/pdf")) },
+            modifier =
+                Modifier
+                    .fillMaxWidth(0.7f)
+                    .padding(8.dp),
+        ) {
+            Text("Load from Device (Local)")
         }
     }
 }

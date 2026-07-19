@@ -15,7 +15,6 @@ class SharedPdfLoaderTest {
     @Test
     fun `given a URL source when loading then it should return bytes from HttpClient`() =
         runTest {
-            // Given
             val expectedBytes = byteArrayOf(1, 2, 3)
             val mockEngine =
                 MockEngine { request ->
@@ -32,17 +31,14 @@ class SharedPdfLoaderTest {
                 }
             val source = PdfSource.Url("https://example.com/sample.pdf")
 
-            // When
             val result = loader.load(source)
 
-            // Then
             assertContentEquals(expectedBytes, result)
         }
 
     @Test
     fun `given a local source when loading then it should delegate to loadLocal`() =
         runTest {
-            // Given
             val expectedBytes = byteArrayOf(4, 5, 6)
             val httpClient = HttpClient(MockEngine { respond("") })
             val loader =
@@ -54,10 +50,8 @@ class SharedPdfLoaderTest {
                 }
             val source = PdfSource.Local("my-local-file")
 
-            // When
             val result = loader.load(source)
 
-            // Then
             assertContentEquals(expectedBytes, result)
         }
 }

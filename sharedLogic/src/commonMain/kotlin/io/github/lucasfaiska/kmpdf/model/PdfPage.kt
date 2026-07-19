@@ -6,7 +6,7 @@ package io.github.lucasfaiska.kmpdf.model
  * @property width The original width of the page in points.
  * @property height The original height of the page in points.
  */
-interface PdfPage {
+interface PdfPage : AutoCloseable {
     val width: Int
     val height: Int
 
@@ -21,4 +21,9 @@ interface PdfPage {
         width: Int,
         height: Int,
     ): ByteArray
+
+    /**
+     * Closes the page and releases any associated resources.
+     */
+    override fun close()
 }

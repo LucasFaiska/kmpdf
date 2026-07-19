@@ -1,10 +1,12 @@
 package io.github.lucasfaiska.kmpdf.ui.cache
 
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.graphics.ImageBitmap
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class PdfPageCacheTest {
     private class MockBitmap : ImageBitmap {
@@ -71,5 +73,26 @@ class PdfPageCacheTest {
         assertNotNull(cache.get(1))
         assertNull(cache.get(2))
         assertNotNull(cache.get(3))
+    }
+
+    @Test
+    fun `given a cache when putting an item then it should trigger snapshot observers`() {
+        val cache = PdfPageCacheImpl(5)
+        var changeNotified = false
+
+        val handle = Snapshot.registerApplyObserver { _, _ ->
+            changeNotified = true
+        }
+
+        try {
+            Snapshot.withMutableSnapshot {
+                cache.put(1, MockBitmap())
+            }
+            Snapshot.sendApplyNotifications()
+            
+            assertTrue(changeNotified)
+        } finally {
+            handle.dispose()
+        }
     }
 }

@@ -13,7 +13,8 @@ kotlin {
     android {
         namespace = "io.github.lucasfaiska.kmpdf"
         compileSdk = 36
-        minSdk = 23
+        compileSdkExtension = 19
+        minSdk = 28
         androidResources.enable = true
         compilerOptions { jvmTarget = JvmTarget.JVM_17 }
 

@@ -6,8 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.IntSize
-import io.github.lucasfaiska.kmpdf.model.PdfDocument
-import io.github.lucasfaiska.kmpdf.model.PdfSource
+import io.github.lucasfaiska.kmpdf.model.*
 import io.github.lucasfaiska.kmpdf.repository.PdfRepository
 import io.github.lucasfaiska.kmpdf.ui.cache.PdfPageCache
 import io.github.lucasfaiska.kmpdf.ui.cache.PdfPageCacheImpl
@@ -43,7 +42,19 @@ internal class PdfViewerState internal constructor(
     /**
      * The error that occurred while loading the document, if any.
      */
-    var error by mutableStateOf<Throwable?>(null)
+    var error by mutableStateOf<PdfError?>(null)
+        private set
+
+    /**
+     * Whether a password is required to open the document.
+     */
+    var isPasswordRequired by mutableStateOf(false)
+        private set
+
+    /**
+     * Whether the provided password was incorrect.
+     */
+    var isPasswordInvalid by mutableStateOf(false)
         private set
 
     /**
@@ -75,26 +86,56 @@ internal class PdfViewerState internal constructor(
     internal fun load(
         source: PdfSource,
         repository: PdfRepository,
+        password: String? = null,
     ) {
-        if (currentSource == source && (loading || document != null)) return
+        if (currentSource == source && password == null && (loading || document != null)) return
 
         currentSource = source
         loading = true
         error = null
+        isPasswordRequired = false
+        isPasswordInvalid = false
+
         coroutineScope.launch {
             try {
-                val newDocument = repository.loadDocument(source)
-                document?.close()
-                document = newDocument
-                cache.clear()
-                zoomScale = 1f
+                val status = repository.loadDocument(source, password)
+                when (status) {
+                    is PdfLoadStatus.Success -> {
+                        document?.close()
+                        document = status.document
+                        cache.clear()
+                        zoomScale = 1f
+                        offset = Offset.Zero
+                    }
+                    PdfLoadStatus.PasswordRequired -> {
+                        isPasswordRequired = true
+                    }
+                    PdfLoadStatus.InvalidPassword -> {
+                        isPasswordInvalid = true
+                    }
+                    is PdfLoadStatus.Error -> {
+                        error = status.error
+                        currentSource = null
+                    }
+                }
             } catch (e: Exception) {
-                error = e
+                error = PdfError(PdfErrorType.GENERIC, e.message, e)
                 currentSource = null
             } finally {
                 loading = false
             }
         }
+    }
+
+    /**
+     * Attempts to unlock the document with the provided password.
+     */
+    fun unlock(
+        password: String,
+        repository: PdfRepository,
+    ) {
+        val source = currentSource ?: return
+        load(source, repository, password)
     }
 
     /**
@@ -182,11 +223,12 @@ internal class PdfViewerState internal constructor(
 
         LaunchedEffect(index, width, height) {
             try {
-                val page = doc.getPage(index)
-                val bytes = page.render(width, height)
-                val bitmap = bytes.toImageBitmap(width, height)
-                cache.put(index, bitmap)
-            } catch (e: Exception) {
+                doc.getPage(index).use { page ->
+                    val bytes = page.render(width, height)
+                    val bitmap = bytes.toImageBitmap(width, height)
+                    cache.put(index, bitmap)
+                }
+            } catch (_: Exception) {
             }
         }
 

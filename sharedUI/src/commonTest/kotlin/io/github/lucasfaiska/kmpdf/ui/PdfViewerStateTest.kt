@@ -1,7 +1,6 @@
 package io.github.lucasfaiska.kmpdf.ui
 
-import io.github.lucasfaiska.kmpdf.model.PdfDocument
-import io.github.lucasfaiska.kmpdf.model.PdfSource
+import io.github.lucasfaiska.kmpdf.model.*
 import io.github.lucasfaiska.kmpdf.repository.PdfRepository
 import io.github.lucasfaiska.kmpdf.ui.cache.PdfPageCacheImpl
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,11 +26,19 @@ class PdfViewerStateTest {
     private class MockPdfRepository : PdfRepository {
         var loadCalled = false
         var shouldFail = false
+        var requiredPassword = false
+        var lastPasswordUsed: String? = null
 
-        override suspend fun loadDocument(source: PdfSource): PdfDocument {
+        override suspend fun loadDocument(
+            source: PdfSource,
+            password: String?,
+        ): PdfLoadStatus {
             loadCalled = true
-            if (shouldFail) throw Exception("Load Error")
-            return MockPdfDocument()
+            lastPasswordUsed = password
+            if (shouldFail) return PdfLoadStatus.Error(PdfError(PdfErrorType.GENERIC))
+            if (requiredPassword && password == null) return PdfLoadStatus.PasswordRequired
+            if (requiredPassword && password != "correct") return PdfLoadStatus.InvalidPassword
+            return PdfLoadStatus.Success(MockPdfDocument())
         }
     }
 
@@ -125,6 +132,53 @@ class PdfViewerStateTest {
             assertFalse(state.loading)
             assertNull(state.document)
             assertNotNull(state.error)
-            assertEquals("Load Error", state.error?.message)
+            assertEquals(PdfErrorType.GENERIC, state.error?.type)
+        }
+
+    @Test
+    fun `given a protected document when loading without password then it should require password`() =
+        testScope.runTest {
+            val repository = MockPdfRepository().apply { requiredPassword = true }
+            val state = PdfViewerState(PdfPageCacheImpl(5), this)
+
+            state.load(PdfSource.Local("protected"), repository)
+            advanceUntilIdle()
+
+            assertTrue(state.isPasswordRequired)
+            assertFalse(state.isPasswordInvalid)
+            assertNull(state.document)
+        }
+
+    @Test
+    fun `given a protected document when loading with incorrect password then it should flag invalid password`() =
+        testScope.runTest {
+            val repository = MockPdfRepository().apply { requiredPassword = true }
+            val state = PdfViewerState(PdfPageCacheImpl(5), this)
+
+            state.load(PdfSource.Local("protected"), repository, "wrong")
+            advanceUntilIdle()
+
+            assertFalse(state.isPasswordRequired)
+            assertTrue(state.isPasswordInvalid)
+            assertNull(state.document)
+        }
+
+    @Test
+    fun `given a protected document when unlocking with correct password then it should load document`() =
+        testScope.runTest {
+            val repository = MockPdfRepository().apply { requiredPassword = true }
+            val state = PdfViewerState(PdfPageCacheImpl(5), this)
+
+            state.load(PdfSource.Local("protected"), repository)
+            advanceUntilIdle()
+            assertTrue(state.isPasswordRequired)
+
+            state.unlock("correct", repository)
+            advanceUntilIdle()
+
+            assertFalse(state.isPasswordRequired)
+            assertFalse(state.isPasswordInvalid)
+            assertNotNull(state.document)
+            assertEquals("correct", repository.lastPasswordUsed)
         }
 }

@@ -10,15 +10,12 @@ import kotlin.test.assertEquals
 class PdfImageMapperTest {
     @Test
     fun `given a byte array when mapping to image bitmap then it should create a bitmap with correct dimensions`() {
-        // Given
         val width = 100
         val height = 200
-        val bytes = ByteArray(width * height * 4) // ARGB_8888
+        val bytes = ByteArray(width * height * 4)
 
-        // When
         val bitmap = bytes.toImageBitmap(width, height)
 
-        // Then
         val androidBitmap = bitmap.asAndroidBitmap()
         assertEquals(width, androidBitmap.width)
         assertEquals(height, androidBitmap.height)
