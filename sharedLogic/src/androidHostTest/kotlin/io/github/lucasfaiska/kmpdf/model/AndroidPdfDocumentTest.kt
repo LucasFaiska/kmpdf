@@ -8,6 +8,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -23,6 +26,7 @@ class AndroidPdfDocumentTest {
         var openPageCount = 0
         val renderCallCount = AtomicInteger(0)
         var maxConcurrentOpenPages = 0
+        var isClosed = false
 
         override val pageCount: Int = 10
 
@@ -36,7 +40,10 @@ class AndroidPdfDocumentTest {
 
         override fun width(index: Int): Int = 100
         override fun height(index: Int): Int = 100
-        override fun close() {}
+        
+        override fun close() {
+            isClosed = true
+        }
 
         fun pageClosed() {
             openPageCount--
@@ -74,6 +81,30 @@ class AndroidPdfDocumentTest {
         assertEquals(5, engine.renderCallCount.get())
         assertEquals(1, engine.maxConcurrentOpenPages)
         
+        document.close()
+    }
+
+    @Test
+    fun `given a document when closing then it should close engine and delete temp file`() {
+        val engine = FakeEngine()
+        val tempFile = File.createTempFile("test_close", ".pdf")
+        val document = AndroidPdfDocument(engine, tempFile, Dispatchers.Unconfined)
+        
+        document.close()
+        
+        assertTrue(engine.isClosed)
+        assertFalse(tempFile.exists())
+    }
+
+    @Test
+    fun `given a document when getting page then it should return page instance`() {
+        val engine = FakeEngine()
+        val tempFile = File.createTempFile("test_get", ".pdf")
+        val document = AndroidPdfDocument(engine, tempFile, Dispatchers.Unconfined)
+        
+        val page = document.getPage(0)
+        
+        assertNotNull(page)
         document.close()
     }
 }
