@@ -111,8 +111,7 @@ internal class PdfViewerState internal constructor(
 
         coroutineScope.launch {
             try {
-                val status = repository.loadDocument(source, password)
-                when (status) {
+                when (val status = repository.loadDocument(source, password)) {
                     is PdfLoadStatus.Success -> {
                         document?.close()
                         document = status.document

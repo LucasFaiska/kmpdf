@@ -5,9 +5,3 @@
 [![Qodana](https://img.shields.io/badge/Qodana-analyzed-blueviolet)](https://qodana.cloud/projects/SUBSTITUA_PELO_SEU_ID)
 
 A lightweight and modern PDF rendering library for KMP, powered by native engines.
-
-## 🚀 Features
-- **Multiplatform**: Support for Android (iOS coming soon).
-- **Native Performance**: Uses native PDF engines for fast and efficient rendering.
-- **Compose Multiplatform**: UI components ready to use.
-- **Modern Stack**: Built with Coroutines, Ktor, and KMP best practices.

@@ -34,7 +34,14 @@ class AndroidPdfReader(
                     if (password == null) PdfLoadStatus.PasswordRequired else PdfLoadStatus.InvalidPassword
                 } catch (e: Exception) {
                     pfd.close()
-                    PdfLoadStatus.Error(PdfError(PdfErrorType.GENERIC, e.message, e))
+                    val errorType =
+                        when {
+                            e.message?.contains("format", ignoreCase = true) == true ||
+                                e.message?.contains("corrupt", ignoreCase = true) == true -> PdfErrorType.CORRUPTED
+                            e.message?.contains("unsupported", ignoreCase = true) == true -> PdfErrorType.UNSUPPORTED
+                            else -> PdfErrorType.GENERIC
+                        }
+                    PdfLoadStatus.Error(PdfError(errorType, e.message, e))
                 }
             } catch (e: Exception) {
                 if (tempFile.exists()) tempFile.delete()

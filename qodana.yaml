@@ -8,5 +8,9 @@ bootstrap: |
 
 profile:
   name: qodana.recommended
+exclude:
+  - name: All
+    paths:
+      - androidApp
 include:
   - name: CheckDependencyLicenses

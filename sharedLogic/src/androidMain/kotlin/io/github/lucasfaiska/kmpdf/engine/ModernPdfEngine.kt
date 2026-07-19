@@ -12,7 +12,7 @@ internal class ModernPdfEngine(
 ) : AndroidPdfEngine {
     private val renderer: PdfRenderer =
         if (password != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            val params = LoadParams.Builder().setPassword(password).build()
+            val params: LoadParams = LoadParams.Builder().setPassword(password).build()
             PdfRenderer(pfd, params)
         } else {
             PdfRenderer(pfd)
@@ -22,9 +22,9 @@ internal class ModernPdfEngine(
 
     override fun openPage(index: Int): AndroidPdfEnginePage = ModernPdfEnginePage(renderer.openPage(index))
 
-    override fun width(index: Int): Int = renderer.openPage(index).use { it.width }
+    override fun width(index: Int): Int = renderer.openPage(index).use { page: PdfRenderer.Page -> page.width }
 
-    override fun height(index: Int): Int = renderer.openPage(index).use { it.height }
+    override fun height(index: Int): Int = renderer.openPage(index).use { page: PdfRenderer.Page -> page.height }
 
     override fun close() = renderer.close()
 }

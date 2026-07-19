@@ -33,7 +33,7 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Run Static Analysis (Detekt & ktlint)
-        run: ./gradlew detektAll ktlintCheck
+        run: ./gradlew detekt ktlintCheck
 
       - name: Run Unit Tests and Coverage
         run: ./gradlew koverLog --stacktrace

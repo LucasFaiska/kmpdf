@@ -17,7 +17,7 @@ internal class CompatPdfEngine(
 ) : AndroidPdfEngine {
     private val renderer: PdfRendererPreV =
         if (password != null) {
-            val params = LoadParams.Builder().setPassword(password).build()
+            val params: LoadParams = LoadParams.Builder().setPassword(password).build()
             PdfRendererPreV(pfd, params)
         } else {
             PdfRendererPreV(pfd)
@@ -27,9 +27,9 @@ internal class CompatPdfEngine(
 
     override fun openPage(index: Int): AndroidPdfEnginePage = CompatPdfEnginePage(renderer.openPage(index))
 
-    override fun width(index: Int): Int = renderer.openPage(index).use { it.width }
+    override fun width(index: Int): Int = renderer.openPage(index).use { page: PdfRendererPreV.Page -> page.width }
 
-    override fun height(index: Int): Int = renderer.openPage(index).use { it.height }
+    override fun height(index: Int): Int = renderer.openPage(index).use { page: PdfRendererPreV.Page -> page.height }
 
     override fun close() = renderer.close()
 }
@@ -43,7 +43,7 @@ private class CompatPdfEnginePage(
     override val height: Int get() = page.height
 
     override fun render(bitmap: Bitmap) {
-        val params = RenderParams.Builder(RenderParams.RENDER_MODE_FOR_DISPLAY).build()
+        val params: RenderParams = RenderParams.Builder(RenderParams.RENDER_MODE_FOR_DISPLAY).build()
         page.render(bitmap, null, null, params)
     }
 
