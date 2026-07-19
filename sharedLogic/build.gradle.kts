@@ -32,6 +32,7 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(libs.ktor.client.mock)
+            implementation(libs.kotlinx.coroutines.test)
         }
         androidMain.dependencies {
             implementation(libs.kotlinx.coroutines.android)
@@ -45,7 +46,6 @@ kotlin {
                 implementation(libs.robolectric)
                 implementation(libs.androidx.test.core)
                 implementation(libs.androidx.test.junit)
-                implementation(libs.kotlinx.coroutines.test)
             }
         }
     }
