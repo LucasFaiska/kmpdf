@@ -6,14 +6,32 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.lucasfaiska.kmpdf.model.PdfSource
 import io.github.lucasfaiska.kmpdf.ui.PdfViewer
+
+private const val SAMPLE_URL = "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf"
+private const val BUTTON_WIDTH_FRACTION = 0.7f
 
 class AppActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,14 +86,12 @@ fun SelectionScreen(onSourceSelected: (PdfSource) -> Unit) {
         Button(
             onClick = {
                 onSourceSelected(
-                    PdfSource.Url(
-                        "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf",
-                    ),
+                    PdfSource.Url(SAMPLE_URL),
                 )
             },
             modifier =
                 Modifier
-                    .fillMaxWidth(0.7f)
+                    .fillMaxWidth(BUTTON_WIDTH_FRACTION)
                     .padding(8.dp),
         ) {
             Text("Load from URL (Remote)")
@@ -89,7 +105,7 @@ fun SelectionScreen(onSourceSelected: (PdfSource) -> Unit) {
             },
             modifier =
                 Modifier
-                    .fillMaxWidth(0.7f)
+                    .fillMaxWidth(BUTTON_WIDTH_FRACTION)
                     .padding(8.dp),
         ) {
             Text("Load from Assets (Local)")
@@ -99,7 +115,7 @@ fun SelectionScreen(onSourceSelected: (PdfSource) -> Unit) {
             onClick = { launcher.launch(arrayOf("application/pdf")) },
             modifier =
                 Modifier
-                    .fillMaxWidth(0.7f)
+                    .fillMaxWidth(BUTTON_WIDTH_FRACTION)
                     .padding(8.dp),
         ) {
             Text("Load from Device (Local)")

@@ -20,9 +20,9 @@ class AndroidPdfEngineProviderTest {
     fun `given api 34 when providing engine then it should return an engine instance`() {
         val file = getSamplePdfFile()
         val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
-        
+
         val engine = AndroidPdfEngineProvider.provideEngine(pfd, null)
-        
+
         assertNotNull(engine)
         engine.close()
     }
@@ -32,16 +32,17 @@ class AndroidPdfEngineProviderTest {
     fun `given api 28 when providing engine then it should return modern engine`() {
         val file = getSamplePdfFile()
         val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
-        
+
         val engine = AndroidPdfEngineProvider.provideEngine(pfd, null)
-        
+
         assertTrue(engine is ModernPdfEngine)
         engine.close()
     }
 
     private fun getSamplePdfFile(): File {
-        val inputStream = javaClass.classLoader?.getResourceAsStream("sample.pdf")
-            ?: throw IllegalStateException("sample.pdf not found in resources")
+        val inputStream =
+            javaClass.classLoader?.getResourceAsStream("sample.pdf")
+                ?: throw IllegalStateException("sample.pdf not found in resources")
         val file = File(context.cacheDir, "provider_test_sample.pdf")
         FileOutputStream(file).use { output ->
             inputStream.copyTo(output)

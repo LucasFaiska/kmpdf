@@ -1,12 +1,9 @@
 [*.{kt,kts}]
 indent_size = 4
 insert_final_newline = true
-max_line_length = 120
+max_line_length = 140
 ij_kotlin_allow_trailing_comma = true
 ij_kotlin_allow_trailing_comma_on_call_site = true
 
-# Disable wildcard imports rule for Compose
-ktlint_standard_no-wildcard-imports = disabled
-
-# Disable function naming rule for Composables (Uppercase names)
+# Standard ktlint rules configuration
 ktlint_standard_function-naming = disabled

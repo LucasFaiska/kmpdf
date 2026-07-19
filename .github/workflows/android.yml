@@ -26,5 +26,17 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew assembleDebug
 
-      - name: Run Unit Tests
-        run: ./gradlew :sharedLogic:testAndroidHostTest
+      - name: Run Static Analysis (Detekt & ktlint)
+        run: ./gradlew detektAll ktlintCheck
+
+      - name: Run Unit Tests and Coverage
+        run: ./gradlew koverLog --stacktrace
+
+      - name: Generate Coverage Report
+        run: ./gradlew koverXmlReport
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: lucasfaiska/kmpdf
