@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
-class AndroidPdfConcurrencyTest {
+class AndroidPdfDocumentTest {
 
     private class FakeEngine : AndroidPdfEngine {
         var openPageCount = 0

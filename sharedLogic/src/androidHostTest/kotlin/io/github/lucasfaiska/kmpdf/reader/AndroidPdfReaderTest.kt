@@ -23,26 +23,10 @@ class AndroidPdfReaderTest {
             val minimalPdfBytes = byteArrayOf(0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x30, 0x0a)
             val status = reader.open(minimalPdfBytes)
 
-            if (status is PdfLoadStatus.Error) {
-                println("Load Error: ${status.error.type}")
-            }
             assertTrue("Expected Success but got $status", status is PdfLoadStatus.Success)
             val document = (status as PdfLoadStatus.Success).document
             assertNotNull(document)
 
             document.close()
-        }
-
-    @Test
-    fun `given an encrypted PDF byte array when opening without password then password required status is returned`() =
-        runTest {
-            // Note: Since we rely on the native engine to throw SecurityException,
-            // and Robolectric shadows might not support deep PDF parsing,
-            // this test validates the status if a SecurityException occurs.
-            // In a real device/emulator, this would trigger PasswordRequired.
-            
-            // For Robolectric, we'll keep it as a placeholder or use a mock
-            // if we need to be strictly deterministic here.
-            // For now, let's just ignore it if it doesn't throw.
         }
 }
