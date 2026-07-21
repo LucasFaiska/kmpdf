@@ -48,9 +48,10 @@ jobs:
           slug: lucasfaiska/kmpdf
 
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@v2024.3
+        uses: JetBrains/qodana-action@v2025.1
         with:
-          args: --property,gradle.ide.support.future.agp.versions=true
+          args: >
+            --property=gradle.ide.support.future.agp.versions=true
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1046294260 }}
           QODANA_ENDPOINT: 'https://qodana.cloud'
