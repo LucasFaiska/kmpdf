@@ -1,4 +1,5 @@
 # WARNING: Do not store sensitive information in this file, as its contents will be included in the Qodana report.
+# Triggering CI pipeline
 
 version: "1.0"
 linter: jetbrains/qodana-jvm-android:2026.1
