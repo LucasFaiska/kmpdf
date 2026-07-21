@@ -1,7 +1,5 @@
 version: "1.0"
 linter: jetbrains/qodana-jvm-android:2026.1
-bootstrap: |
-  ./gradlew :sharedLogic:prepareKotlinIdeaImport :sharedUI:prepareKotlinIdeaImport --no-configuration-cache --no-daemon
 
 profile:
   name: qodana.recommended
@@ -21,6 +19,8 @@ properties:
   gradle.ide.support.future.agp.versions: "true"
   idea.max.intellisense.filesize: "20000"
   kotlin.indexing.shared.enabled: "false"
+  idea.ignore.vfs.recursion: "true"
+  idea.trust.all.projects: "true"
 
 coverage:
   report: build/reports/kover/report.xml
