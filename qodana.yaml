@@ -1,7 +1,5 @@
-# WARNING: Do not store sensitive information in this file, as its contents will be included in the Qodana report.
-
 version: "1.0"
-linter: jetbrains/qodana-jvm-android:2026.1
+linter: jetbrains/qodana-jvm-android:latest
 bootstrap: |
   ./gradlew :sharedLogic:assemble :sharedUI:assemble --no-configuration-cache
 
@@ -12,10 +10,8 @@ exclude:
   - name: All
     paths:
       - androidApp
+      - .kotlin
+      - build
 
 include:
   - name: CheckDependencyLicenses
-
-projectJDK: "17"
-properties:
-  gradle.ide.support.future.agp.versions: "true"
