@@ -19,3 +19,6 @@ include:
 projectJDK: "17"
 properties:
   gradle.ide.support.future.agp.versions: "true"
+
+coverage:
+  report: build/reports/kover/report.xml
