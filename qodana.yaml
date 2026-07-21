@@ -21,12 +21,8 @@ include:
 projectJDK: "17"
 properties:
   gradle.ide.support.future.agp.versions: "true"
-  idea.max.content.load.filesize: "20000"
-  # Propriedades de estabilidade para KMP
-  idea.kotlin.pagemap.storage.max.size: "500"
-  idea.skip.indices.ms: "10000"
-  # Forçar a IDE a não seguir links simbólicos ou pastas de metadados voláteis
-  idea.ignore.vfs.recursion: "true"
+  idea.max.intellisense.filesize: "20000"
+  kotlin.indexing.shared.enabled: "false"
 
 coverage:
   report: build/reports/kover/report.xml
