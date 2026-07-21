@@ -3,7 +3,7 @@
 version: "1.0"
 linter: jetbrains/qodana-jvm-android:2026.1
 bootstrap: |
-  ./gradlew :sharedLogic:assemble :sharedUI:assemble --no-configuration-cache
+  ./gradlew :sharedLogic:assemble :sharedUI:assemble --no-configuration-cache --no-daemon
 
 profile:
   name: qodana.recommended
@@ -12,6 +12,8 @@ exclude:
   - name: All
     paths:
       - androidApp
+      - .kotlin
+      - build
 
 include:
   - name: CheckDependencyLicenses
@@ -19,6 +21,7 @@ include:
 projectJDK: "17"
 properties:
   gradle.ide.support.future.agp.versions: "true"
+  idea.max.content.load.filesize: "20000"
 
 coverage:
   report: build/reports/kover/report.xml
