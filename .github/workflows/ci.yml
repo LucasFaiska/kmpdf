@@ -48,7 +48,7 @@ jobs:
           slug: lucasfaiska/kmpdf
 
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@v2025.1
+        uses: JetBrains/qodana-action@v2026.1.3
         with:
           args: >
             --property=gradle.ide.support.future.agp.versions=true
