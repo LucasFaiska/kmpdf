@@ -3,7 +3,7 @@
 version: "1.0"
 linter: jetbrains/qodana-jvm-android:2026.1
 bootstrap: |
-  ./gradlew :sharedLogic:assemble :sharedUI:assemble --no-configuration-cache --no-daemon
+  ./gradlew :sharedLogic:prepareKotlinIdeaImport :sharedUI:prepareKotlinIdeaImport --no-configuration-cache --no-daemon
 
 profile:
   name: qodana.recommended
@@ -22,6 +22,11 @@ projectJDK: "17"
 properties:
   gradle.ide.support.future.agp.versions: "true"
   idea.max.content.load.filesize: "20000"
+  # Propriedades de estabilidade para KMP
+  idea.kotlin.pagemap.storage.max.size: "500"
+  idea.skip.indices.ms: "10000"
+  # Forçar a IDE a não seguir links simbólicos ou pastas de metadados voláteis
+  idea.ignore.vfs.recursion: "true"
 
 coverage:
   report: build/reports/kover/report.xml
