@@ -3,7 +3,7 @@
 version: "1.0"
 linter: jetbrains/qodana-jvm-android:2024.3
 bootstrap: |
-  ./gradlew :sharedLogic:assemble :sharedUI:assemble
+  ./gradlew :sharedLogic:assemble :sharedUI:assemble --no-configuration-cache
 
 profile:
   name: qodana.recommended
