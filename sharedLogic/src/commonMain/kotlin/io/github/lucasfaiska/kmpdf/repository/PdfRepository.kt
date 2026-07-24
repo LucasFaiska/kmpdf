@@ -1,6 +1,8 @@
 package io.github.lucasfaiska.kmpdf.repository
 
 import io.github.lucasfaiska.kmpdf.loader.PdfLoader
+import io.github.lucasfaiska.kmpdf.model.PdfError
+import io.github.lucasfaiska.kmpdf.model.PdfErrorType
 import io.github.lucasfaiska.kmpdf.model.PdfLoadStatus
 import io.github.lucasfaiska.kmpdf.model.PdfSource
 import io.github.lucasfaiska.kmpdf.reader.PdfReader
@@ -27,7 +29,17 @@ class PdfRepositoryImpl(
         source: PdfSource,
         password: String?,
     ): PdfLoadStatus {
-        val bytes = loader.load(source)
-        return reader.open(bytes, password)
+        return try {
+            val bytes = loader.load(source)
+            reader.open(bytes, password)
+        } catch (e: Exception) {
+            PdfLoadStatus.Error(
+                PdfError(
+                    type = PdfErrorType.GENERIC,
+                    message = e.message,
+                    throwable = e
+                )
+            )
+        }
     }
 }
