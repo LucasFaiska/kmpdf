@@ -47,7 +47,9 @@ jobs:
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2024.3.3
         with:
-          use-native: true
-          args: --property=gradle.ide.support.future.agp.versions=true --coverage-dir=build/reports/kover
+          args: >
+            --image=jetbrains/qodana-android:2024.3
+            --property=gradle.ide.support.future.agp.versions=true
+            --coverage-dir=build/reports/kover
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1046294260 }}
