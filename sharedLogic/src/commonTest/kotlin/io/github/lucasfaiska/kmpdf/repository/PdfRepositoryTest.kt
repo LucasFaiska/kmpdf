@@ -2,7 +2,6 @@ package io.github.lucasfaiska.kmpdf.repository
 
 import io.github.lucasfaiska.kmpdf.loader.PdfLoader
 import io.github.lucasfaiska.kmpdf.model.PdfDocument
-import io.github.lucasfaiska.kmpdf.model.PdfError
 import io.github.lucasfaiska.kmpdf.model.PdfErrorType
 import io.github.lucasfaiska.kmpdf.model.PdfLoadStatus
 import io.github.lucasfaiska.kmpdf.model.PdfSource
@@ -13,7 +12,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class PdfRepositoryTest {
-
     private class MockPdfLoader : PdfLoader {
         var lastSource: PdfSource? = null
         var resultBytes: ByteArray = byteArrayOf()
@@ -29,13 +27,21 @@ class PdfRepositoryTest {
     private class MockPdfReader : PdfReader {
         var lastBytes: ByteArray? = null
         var lastPassword: String? = null
-        var resultStatus: PdfLoadStatus = PdfLoadStatus.Success(object : PdfDocument {
-            override val pageCount: Int = 0
-            override fun getPage(index: Int) = throw NotImplementedError()
-            override fun close() {}
-        })
+        var resultStatus: PdfLoadStatus =
+            PdfLoadStatus.Success(
+                object : PdfDocument {
+                    override val pageCount: Int = 0
 
-        override suspend fun open(bytes: ByteArray, password: String?): PdfLoadStatus {
+                    override fun getPage(index: Int) = throw NotImplementedError()
+
+                    override fun close() {}
+                },
+            )
+
+        override suspend fun open(
+            bytes: ByteArray,
+            password: String?,
+        ): PdfLoadStatus {
             lastBytes = bytes
             lastPassword = password
             return resultStatus
@@ -43,35 +49,37 @@ class PdfRepositoryTest {
     }
 
     @Test
-    fun `loadDocument should call loader and reader with correct parameters`() = runTest {
-        val loader = MockPdfLoader()
-        val reader = MockPdfReader()
-        val repository = PdfRepositoryImpl(loader, reader)
-        val source = PdfSource.Local("test.pdf")
-        val password = "password123"
-        val expectedBytes = byteArrayOf(1, 2, 3)
-        loader.resultBytes = expectedBytes
+    fun `loadDocument should call loader and reader with correct parameters`() =
+        runTest {
+            val loader = MockPdfLoader()
+            val reader = MockPdfReader()
+            val repository = PdfRepositoryImpl(loader, reader)
+            val source = PdfSource.Local("test.pdf")
+            val password = "password123"
+            val expectedBytes = byteArrayOf(1, 2, 3)
+            loader.resultBytes = expectedBytes
 
-        val result = repository.loadDocument(source, password)
+            val result = repository.loadDocument(source, password)
 
-        assertEquals(source, loader.lastSource)
-        assertEquals(expectedBytes, reader.lastBytes)
-        assertEquals(password, reader.lastPassword)
-        assertEquals(reader.resultStatus, result)
-    }
+            assertEquals(source, loader.lastSource)
+            assertEquals(expectedBytes, reader.lastBytes)
+            assertEquals(password, reader.lastPassword)
+            assertEquals(reader.resultStatus, result)
+        }
 
     @Test
-    fun `loadDocument should return Error status when loader throws exception`() = runTest {
-        val loader = MockPdfLoader()
-        val reader = MockPdfReader()
-        val repository = PdfRepositoryImpl(loader, reader)
-        val source = PdfSource.Local("test.pdf")
-        loader.shouldThrow = true
+    fun `loadDocument should return Error status when loader throws exception`() =
+        runTest {
+            val loader = MockPdfLoader()
+            val reader = MockPdfReader()
+            val repository = PdfRepositoryImpl(loader, reader)
+            val source = PdfSource.Local("test.pdf")
+            loader.shouldThrow = true
 
-        val result = repository.loadDocument(source, null)
+            val result = repository.loadDocument(source, null)
 
-        assertTrue(result is PdfLoadStatus.Error)
-        assertEquals(PdfErrorType.GENERIC, (result as PdfLoadStatus.Error).error.type)
-        assertEquals("Load failed", result.error.message)
-    }
+            assertTrue(result is PdfLoadStatus.Error)
+            assertEquals(PdfErrorType.GENERIC, result.error.type)
+            assertEquals("Load failed", result.error.message)
+        }
 }

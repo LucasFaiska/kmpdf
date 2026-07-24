@@ -28,8 +28,8 @@ class PdfRepositoryImpl(
     override suspend fun loadDocument(
         source: PdfSource,
         password: String?,
-    ): PdfLoadStatus {
-        return try {
+    ): PdfLoadStatus =
+        try {
             val bytes = loader.load(source)
             reader.open(bytes, password)
         } catch (e: Exception) {
@@ -37,9 +37,8 @@ class PdfRepositoryImpl(
                 PdfError(
                     type = PdfErrorType.GENERIC,
                     message = e.message,
-                    throwable = e
-                )
+                    throwable = e,
+                ),
             )
         }
-    }
 }
