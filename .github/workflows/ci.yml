@@ -47,10 +47,8 @@ jobs:
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2026.1.3
         with:
-          use-native: true
           args: >
+            --image=jetbrains/qodana-jvm:2026.1,
             --property=gradle.ide.support.future.agp.versions=true
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1046294260 }}
-          QODANA_ENDPOINT: 'https://qodana.cloud'
-          JDK_HOME: ${{ env.JAVA_HOME }}
