@@ -41,15 +41,11 @@ jobs:
       - name: Generate Coverage Report
         run: ./gradlew koverXmlReport
 
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./build/reports/kover/report.xml
+
       - name: Stop Gradle Daemons
         run: ./gradlew --stop
-
-      - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@v2024.3.3
-        with:
-          args: >
-            --image=jetbrains/qodana-android:2024.3
-            --property=gradle.ide.support.future.agp.versions=true
-            --coverage-dir=build/reports/kover
-        env:
-          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1046294260 }}
