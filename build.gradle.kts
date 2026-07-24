@@ -27,6 +27,12 @@ allprojects {
     apply(plugin = detektId)
     apply(plugin = koverId)
 
+    if (project.path == ":androidApp") {
+        kover {
+            disable()
+        }
+    }
+
     configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
         filter {
             exclude { it.file.path.contains("build/") }
