@@ -11,8 +11,5 @@ exclude:
       - .kotlin
       - build
 
-coverage:
-  path: build/reports/kover/report.xml
-
 properties:
   gradle.ide.support.future.agp.versions: "true"
