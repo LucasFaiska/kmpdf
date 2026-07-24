@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class AndroidPdfDocumentTest {
-
     private class FakeEngine : AndroidPdfEngine {
         var openPageCount = 0
         val renderCallCount = AtomicInteger(0)
@@ -39,8 +38,9 @@ class AndroidPdfDocumentTest {
         }
 
         override fun width(index: Int): Int = 100
+
         override fun height(index: Int): Int = 100
-        
+
         override fun close() {
             isClosed = true
         }
@@ -50,7 +50,9 @@ class AndroidPdfDocumentTest {
         }
     }
 
-    private class FakePage(val engine: FakeEngine) : AndroidPdfEnginePage {
+    private class FakePage(
+        val engine: FakeEngine,
+    ) : AndroidPdfEnginePage {
         override val width: Int = 100
         override val height: Int = 100
 
@@ -64,34 +66,37 @@ class AndroidPdfDocumentTest {
     }
 
     @Test
-    fun `given concurrent render calls when rendering pages then engine should only have one page open at a time`() = runTest {
-        val engine = FakeEngine()
-        val tempFile = File.createTempFile("test", ".pdf")
-        val document = AndroidPdfDocument(engine, tempFile, Dispatchers.Unconfined)
-        
-        val pages = (0 until 5).map { document.getPage(it) }
+    fun `given concurrent render calls when rendering pages then engine should only have one page open at a time`() =
+        runTest {
+            val engine = FakeEngine()
+            val tempFile = File.createTempFile("test", ".pdf")
+            val document = AndroidPdfDocument(engine, tempFile, Dispatchers.Unconfined)
 
-        val results = pages.map { page ->
-            async {
-                page.render(100, 100)
-            }
-        }.awaitAll()
+            val pages = (0 until 5).map { document.getPage(it) }
 
-        assertEquals(5, results.size)
-        assertEquals(5, engine.renderCallCount.get())
-        assertEquals(1, engine.maxConcurrentOpenPages)
-        
-        document.close()
-    }
+            val results =
+                pages
+                    .map { page ->
+                        async {
+                            page.render(100, 100)
+                        }
+                    }.awaitAll()
+
+            assertEquals(5, results.size)
+            assertEquals(5, engine.renderCallCount.get())
+            assertEquals(1, engine.maxConcurrentOpenPages)
+
+            document.close()
+        }
 
     @Test
     fun `given a document when closing then it should close engine and delete temp file`() {
         val engine = FakeEngine()
         val tempFile = File.createTempFile("test_close", ".pdf")
         val document = AndroidPdfDocument(engine, tempFile, Dispatchers.Unconfined)
-        
+
         document.close()
-        
+
         assertTrue(engine.isClosed)
         assertFalse(tempFile.exists())
     }
@@ -101,9 +106,9 @@ class AndroidPdfDocumentTest {
         val engine = FakeEngine()
         val tempFile = File.createTempFile("test_get", ".pdf")
         val document = AndroidPdfDocument(engine, tempFile, Dispatchers.Unconfined)
-        
+
         val page = document.getPage(0)
-        
+
         assertNotNull(page)
         document.close()
     }

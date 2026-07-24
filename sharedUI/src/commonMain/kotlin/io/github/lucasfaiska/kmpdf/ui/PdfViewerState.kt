@@ -2,11 +2,24 @@ package io.github.lucasfaiska.kmpdf.ui
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.IntSize
-import io.github.lucasfaiska.kmpdf.model.*
+import io.github.lucasfaiska.kmpdf.model.PdfDocument
+import io.github.lucasfaiska.kmpdf.model.PdfError
+import io.github.lucasfaiska.kmpdf.model.PdfErrorType
+import io.github.lucasfaiska.kmpdf.model.PdfLoadStatus
+import io.github.lucasfaiska.kmpdf.model.PdfSource
 import io.github.lucasfaiska.kmpdf.repository.PdfRepository
 import io.github.lucasfaiska.kmpdf.ui.cache.PdfPageCache
 import io.github.lucasfaiska.kmpdf.ui.cache.PdfPageCacheImpl
@@ -98,8 +111,7 @@ internal class PdfViewerState internal constructor(
 
         coroutineScope.launch {
             try {
-                val status = repository.loadDocument(source, password)
-                when (status) {
+                when (val status = repository.loadDocument(source, password)) {
                     is PdfLoadStatus.Success -> {
                         document?.close()
                         document = status.document
