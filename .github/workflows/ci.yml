@@ -48,7 +48,6 @@ jobs:
         uses: JetBrains/qodana-action@v2024.3.3
         with:
           use-native: true
-          args: >
-            --property=gradle.ide.support.future.agp.versions=true
+          args: --property=gradle.ide.support.future.agp.versions=true
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1046294260 }}

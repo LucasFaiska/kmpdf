@@ -1,5 +1,5 @@
 version: "1.0"
-linter: jetbrains/qodana-jvm:2026.1
+linter: jetbrains/qodana-jvm:2024.3
 
 profile:
   name: qodana.recommended
@@ -12,7 +12,7 @@ exclude:
       - build
 
 coverage:
-  report: build/reports/kover/report.xml
+  path: build/reports/kover/report.xml
 
 properties:
   gradle.ide.support.future.agp.versions: "true"
