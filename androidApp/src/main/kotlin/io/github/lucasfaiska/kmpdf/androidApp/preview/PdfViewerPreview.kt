@@ -17,10 +17,9 @@ fun PdfViewerPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun PdfViewerLoadingPreview() {
+fun PdfViewerWithToolbarPreview() {
     PdfViewer(
         url = "https://example.com/sample.pdf",
         modifier = Modifier.fillMaxSize(),
-        showToolbar = true,
     )
 }

@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,8 +28,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.lucasfaiska.kmpdf.material3.Material3LoadingContent
+import io.github.lucasfaiska.kmpdf.material3.Material3PasswordDialog
+import io.github.lucasfaiska.kmpdf.material3.Material3PdfToolbar
 import io.github.lucasfaiska.kmpdf.model.PdfSource
 import io.github.lucasfaiska.kmpdf.ui.PdfViewer
+import io.github.lucasfaiska.kmpdf.ui.rememberPdfRepository
+import io.github.lucasfaiska.kmpdf.ui.rememberPdfViewerState
 
 private const val SAMPLE_URL = "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf"
 private const val BUTTON_WIDTH_FRACTION = 0.7f
@@ -143,25 +149,25 @@ fun ViewerScreen(
             )
         },
     ) { padding ->
-        val modifier =
-            Modifier
-                .fillMaxSize()
-                .padding(padding)
+        val state = rememberPdfViewerState()
+        val repository = rememberPdfRepository()
 
-        when (source) {
-            is PdfSource.Url ->
-                PdfViewer(
-                    url = source.url,
-                    modifier = modifier,
-                    showToolbar = true,
-                )
-
-            is PdfSource.Local ->
-                PdfViewer(
-                    identifier = source.identifier,
-                    modifier = modifier,
-                    showToolbar = true,
-                )
+        LaunchedEffect(source, repository) {
+            state.load(source, repository)
         }
+
+        PdfViewer(
+            state = state,
+            modifier = Modifier.fillMaxSize().padding(padding),
+            topBar = {
+                Material3PdfToolbar(state = state, source = source)
+            },
+            loadingContent = {
+                Material3LoadingContent()
+            },
+            passwordDialog = { isInvalid, onConfirm ->
+                Material3PasswordDialog(isInvalid = isInvalid, onConfirm = onConfirm)
+            },
+        )
     }
 }
