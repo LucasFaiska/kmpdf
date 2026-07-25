@@ -80,16 +80,17 @@ class PdfPageCacheTest {
         val cache = PdfPageCacheImpl(5)
         var changeNotified = false
 
-        val handle = Snapshot.registerApplyObserver { _, _ ->
-            changeNotified = true
-        }
+        val handle =
+            Snapshot.registerApplyObserver { _, _ ->
+                changeNotified = true
+            }
 
         try {
             Snapshot.withMutableSnapshot {
                 cache.put(1, MockBitmap())
             }
             Snapshot.sendApplyNotifications()
-            
+
             assertTrue(changeNotified)
         } finally {
             handle.dispose()

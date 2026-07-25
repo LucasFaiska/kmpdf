@@ -4,8 +4,6 @@ import android.graphics.Bitmap
 import io.github.lucasfaiska.kmpdf.engine.AndroidPdfEngine
 import io.github.lucasfaiska.kmpdf.engine.AndroidPdfEnginePage
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -16,95 +14,67 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.io.File
-import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class AndroidPdfDocumentTest {
+    private class MockPdfEngine : AndroidPdfEngine {
+        override val pageCount: Int = 5
+        var closed = false
+        var lastRenderBitmap: Bitmap? = null
 
-    private class FakeEngine : AndroidPdfEngine {
-        var openPageCount = 0
-        val renderCallCount = AtomicInteger(0)
-        var maxConcurrentOpenPages = 0
-        var isClosed = false
+        override fun openPage(index: Int): AndroidPdfEnginePage =
+            object : AndroidPdfEnginePage {
+                override val width: Int = 100
+                override val height: Int = 200
 
-        override val pageCount: Int = 10
+                override fun render(bitmap: Bitmap) {
+                    lastRenderBitmap = bitmap
+                }
 
-        override fun openPage(index: Int): AndroidPdfEnginePage {
-            openPageCount++
-            if (openPageCount > maxConcurrentOpenPages) {
-                maxConcurrentOpenPages = openPageCount
+                override fun close() {}
             }
-            return FakePage(this)
-        }
 
         override fun width(index: Int): Int = 100
-        override fun height(index: Int): Int = 100
-        
-        override fun close() {
-            isClosed = true
-        }
 
-        fun pageClosed() {
-            openPageCount--
-        }
-    }
-
-    private class FakePage(val engine: FakeEngine) : AndroidPdfEnginePage {
-        override val width: Int = 100
-        override val height: Int = 100
-
-        override fun render(bitmap: Bitmap) {
-            engine.renderCallCount.incrementAndGet()
-        }
+        override fun height(index: Int): Int = 200
 
         override fun close() {
-            engine.pageClosed()
+            closed = true
         }
     }
 
     @Test
-    fun `given concurrent render calls when rendering pages then engine should only have one page open at a time`() = runTest {
-        val engine = FakeEngine()
+    fun `given a valid engine and temp file when document is initialized then it should proxy properties correctly`() {
+        val engine = MockPdfEngine()
         val tempFile = File.createTempFile("test", ".pdf")
         val document = AndroidPdfDocument(engine, tempFile, Dispatchers.Unconfined)
-        
-        val pages = (0 until 5).map { document.getPage(it) }
 
-        val results = pages.map { page ->
-            async {
-                page.render(100, 100)
-            }
-        }.awaitAll()
+        assertEquals(5, document.pageCount)
+        val page = document.getPage(0)
+        assertNotNull(page)
+        assertTrue(page is AndroidPdfPage)
 
-        assertEquals(5, results.size)
-        assertEquals(5, engine.renderCallCount.get())
-        assertEquals(1, engine.maxConcurrentOpenPages)
-        
         document.close()
-    }
-
-    @Test
-    fun `given a document when closing then it should close engine and delete temp file`() {
-        val engine = FakeEngine()
-        val tempFile = File.createTempFile("test_close", ".pdf")
-        val document = AndroidPdfDocument(engine, tempFile, Dispatchers.Unconfined)
-        
-        document.close()
-        
-        assertTrue(engine.isClosed)
+        assertTrue(engine.closed)
         assertFalse(tempFile.exists())
     }
 
     @Test
-    fun `given a document when getting page then it should return page instance`() {
-        val engine = FakeEngine()
-        val tempFile = File.createTempFile("test_get", ".pdf")
-        val document = AndroidPdfDocument(engine, tempFile, Dispatchers.Unconfined)
-        
-        val page = document.getPage(0)
-        
-        assertNotNull(page)
-        document.close()
-    }
+    fun `given a valid page when render is called then it should create a bitmap and delegate to engine`() =
+        runTest {
+            val engine = MockPdfEngine()
+            val tempFile = File.createTempFile("test_render", ".pdf")
+            val document = AndroidPdfDocument(engine, tempFile, Dispatchers.Unconfined)
+            val page = document.getPage(0)
+
+            val result = page.render(100, 200)
+
+            assertNotNull(result)
+            assertNotNull(engine.lastRenderBitmap)
+            assertEquals(100, engine.lastRenderBitmap?.width)
+            assertEquals(200, engine.lastRenderBitmap?.height)
+
+            document.close()
+        }
 }

@@ -6,11 +6,9 @@ import io.github.lucasfaiska.kmpdf.model.PdfSource
 
 internal class IosPdfPlatformActions : PdfPlatformActions {
     override fun share(source: PdfSource) {
-        // Implementation postponed until PDF rendering is ready on iOS
     }
 
     override fun download(url: String) {
-        // Implementation postponed until PDF rendering is ready on iOS
     }
 }
 

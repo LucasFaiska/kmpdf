@@ -38,6 +38,5 @@ internal class AndroidPdfPage(
         }
 
     override fun close() {
-        // No-op as we open and close per render to ensure strict single-page usage
     }
 }

@@ -2,7 +2,6 @@ package io.github.lucasfaiska.kmpdf.engine
 
 import android.graphics.Bitmap
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -11,7 +10,7 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
-class ModernPdfEngineTest {
+class CompatPdfEngineTest {
     private class FakeNativePage(
         override val width: Int = 100,
         override val height: Int = 200,
@@ -42,16 +41,15 @@ class ModernPdfEngineTest {
     }
 
     @Test
-    fun `given a fake native engine when modern engine is used then it should proxy properties and open pages correctly`() {
+    fun `given a fake native engine when compat engine is used then it should proxy properties correctly`() {
         val fakeNative = FakeNativeEngine()
-        val engine = ModernPdfEngine(fakeNative)
+        val engine = CompatPdfEngine(fakeNative)
 
         assertEquals(5, engine.pageCount)
         assertEquals(100, engine.width(0))
         assertEquals(200, engine.height(0))
 
         val page = engine.openPage(0)
-        assertNotNull(page)
         assertEquals(100, page.width)
         assertEquals(200, page.height)
 
@@ -60,9 +58,9 @@ class ModernPdfEngineTest {
     }
 
     @Test
-    fun `given a modern engine page when render is called then it should delegate to native wrapper`() {
+    fun `given a compat engine page when render is called then it should delegate to native wrapper`() {
         val fakePage = FakeNativePage()
-        val page = ModernPdfEnginePage(fakePage)
+        val page = CompatPdfEnginePage(fakePage)
         val bitmap = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
 
         page.render(bitmap)

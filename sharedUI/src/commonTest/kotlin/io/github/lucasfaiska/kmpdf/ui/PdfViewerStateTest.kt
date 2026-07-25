@@ -1,6 +1,10 @@
 package io.github.lucasfaiska.kmpdf.ui
 
-import io.github.lucasfaiska.kmpdf.model.*
+import io.github.lucasfaiska.kmpdf.model.PdfDocument
+import io.github.lucasfaiska.kmpdf.model.PdfError
+import io.github.lucasfaiska.kmpdf.model.PdfErrorType
+import io.github.lucasfaiska.kmpdf.model.PdfLoadStatus
+import io.github.lucasfaiska.kmpdf.model.PdfSource
 import io.github.lucasfaiska.kmpdf.repository.PdfRepository
 import io.github.lucasfaiska.kmpdf.ui.cache.PdfPageCacheImpl
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -8,7 +12,12 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PdfViewerStateTest {

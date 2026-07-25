@@ -1,5 +1,7 @@
 package io.github.lucasfaiska.kmpdf.engine
 
+import android.graphics.pdf.PdfRenderer
+import android.graphics.pdf.PdfRendererPreV
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.os.ext.SdkExtensions
@@ -12,11 +14,11 @@ internal object AndroidPdfEngineProvider {
         when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
                 SdkExtensions.getExtensionVersion(Build.VERSION_CODES.S) >= 13 -> {
-                CompatPdfEngine(pfd, password)
+                CompatPdfEngine(RealCompatNativeEngine(PdfRendererPreV(pfd)))
             }
 
             else -> {
-                ModernPdfEngine(pfd, password)
+                ModernPdfEngine(RealModernNativeEngine(PdfRenderer(pfd)))
             }
         }
 }
