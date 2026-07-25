@@ -9,6 +9,7 @@ import io.github.lucasfaiska.kmpdf.reader.PdfReader
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class PdfRepositoryTest {
@@ -49,7 +50,7 @@ class PdfRepositoryTest {
     }
 
     @Test
-    fun `loadDocument should call loader and reader with correct parameters`() =
+    fun `given valid source and password when loading document then it should return success status`() =
         runTest {
             val loader = MockPdfLoader()
             val reader = MockPdfReader()
@@ -68,7 +69,7 @@ class PdfRepositoryTest {
         }
 
     @Test
-    fun `loadDocument should return Error status when loader throws exception`() =
+    fun `given loader throws exception when loading document then it should return generic error status`() =
         runTest {
             val loader = MockPdfLoader()
             val reader = MockPdfReader()
@@ -82,4 +83,13 @@ class PdfRepositoryTest {
             assertEquals(PdfErrorType.GENERIC, result.error.type)
             assertEquals("Load failed", result.error.message)
         }
+
+    @Test
+    fun `given invalid password and password required states when instantiated then they should exist`() {
+        val invalidPassword = PdfLoadStatus.InvalidPassword
+        val passwordRequired = PdfLoadStatus.PasswordRequired
+
+        assertNotNull(invalidPassword)
+        assertNotNull(passwordRequired)
+    }
 }

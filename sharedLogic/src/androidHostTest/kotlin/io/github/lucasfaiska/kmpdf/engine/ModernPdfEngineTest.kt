@@ -17,7 +17,7 @@ class ModernPdfEngineTest {
     private val context = ApplicationProvider.getApplicationContext<android.content.Context>()
 
     @Test
-    fun `given a valid PDF file when initialized then it should not throw exception`() =
+    fun `given a valid PDF file when initialized then it should successfully create a modern engine`() =
         runTest {
             val file = getSamplePdfFile()
             val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
@@ -32,7 +32,7 @@ class ModernPdfEngineTest {
         val inputStream =
             javaClass.classLoader?.getResourceAsStream("sample.pdf")
                 ?: throw IllegalStateException("sample.pdf not found in resources")
-        val file = File(context.cacheDir, "test_sample.pdf")
+        val file = File(context.cacheDir, "test_sample_modern.pdf")
         FileOutputStream(file).use { output ->
             inputStream.copyTo(output)
         }

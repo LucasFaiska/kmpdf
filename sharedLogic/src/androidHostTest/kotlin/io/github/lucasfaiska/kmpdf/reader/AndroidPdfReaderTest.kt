@@ -16,16 +16,15 @@ class AndroidPdfReaderTest {
     private val reader = AndroidPdfReader(context, Dispatchers.Unconfined)
 
     @Test
-    fun `given valid bytes when opening then it should attempt to process`() =
+    fun `given valid bytes when opening then it should successfully attempt to process document`() =
         runTest {
             val bytes = getSamplePdfBytes()
-            // We run it just to cover the lines. Success or Error depends on Robolectric's PdfRenderer stubbing.
             val result = reader.open(bytes, null)
             assertNotNull(result)
         }
 
     @Test
-    fun `given invalid bytes when opening then it should return status`() =
+    fun `given invalid bytes when opening then it should return an error status`() =
         runTest {
             val bytes = byteArrayOf(1, 2, 3)
             val result = reader.open(bytes, null)

@@ -23,22 +23,23 @@ import java.io.FileOutputStream
 @Config(sdk = [34])
 class AndroidPdfLoaderTest {
     private val context = ApplicationProvider.getApplicationContext<android.content.Context>()
-    private val client = HttpClient(MockEngine) {
-        engine {
-            addHandler { _ ->
-                respond(byteArrayOf(1, 2, 3), HttpStatusCode.OK)
+    private val client =
+        HttpClient(MockEngine) {
+            engine {
+                addHandler { _ ->
+                    respond(byteArrayOf(1, 2, 3), HttpStatusCode.OK)
+                }
             }
         }
-    }
     private val loader = AndroidPdfLoader(context, client, Dispatchers.Unconfined)
 
     @Test
-    fun `given valid local source when loading then it should return bytes`() =
+    fun `given valid local source when loading then it should return bytes from content resolver`() =
         runTest {
             val file = getSamplePdfFile()
             val uri = android.net.Uri.parse("file://${file.absolutePath}")
             val source = PdfSource.Local(uri.toString())
-            
+
             shadowOf(context.contentResolver).registerInputStream(uri, FileInputStream(file))
 
             val result = loader.load(source)
@@ -48,7 +49,7 @@ class AndroidPdfLoaderTest {
         }
 
     @Test
-    fun `given url source when loading then it should return bytes from client`() =
+    fun `given url source when loading then it should return bytes from network client`() =
         runTest {
             val source = PdfSource.Url("https://example.com/test.pdf")
             val result = loader.load(source)

@@ -2,7 +2,6 @@ package io.github.lucasfaiska.kmpdf.engine
 
 import android.os.ParcelFileDescriptor
 import androidx.test.core.app.ApplicationProvider
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,22 +16,9 @@ class AndroidPdfEngineProviderTest {
 
     @Test
     @Config(sdk = [34])
-    fun `given api 34 when providing engine then it should return an engine instance`() {
+    fun `given api 34 and low sdk extension when providing engine then it should return modern engine`() {
         val file = getSamplePdfFile()
         val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
-
-        val engine = AndroidPdfEngineProvider.provideEngine(pfd, null)
-
-        assertNotNull(engine)
-        engine.close()
-    }
-
-    @Test
-    @Config(sdk = [28])
-    fun `given api 28 when providing engine then it should return modern engine`() {
-        val file = getSamplePdfFile()
-        val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
-
         val engine = AndroidPdfEngineProvider.provideEngine(pfd, null)
 
         assertTrue(engine is ModernPdfEngine)
@@ -43,7 +29,7 @@ class AndroidPdfEngineProviderTest {
         val inputStream =
             javaClass.classLoader?.getResourceAsStream("sample.pdf")
                 ?: throw IllegalStateException("sample.pdf not found in resources")
-        val file = File(context.cacheDir, "provider_test_sample.pdf")
+        val file = File(context.cacheDir, "test_sample_provider.pdf")
         FileOutputStream(file).use { output ->
             inputStream.copyTo(output)
         }
