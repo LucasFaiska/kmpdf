@@ -14,11 +14,11 @@ internal interface AndroidPdfEngine {
     fun close()
 }
 
-internal interface AndroidPdfEnginePage {
+internal interface AndroidPdfEnginePage : AutoCloseable {
     val width: Int
     val height: Int
 
     fun render(bitmap: Bitmap)
 
-    fun close()
+    override fun close()
 }

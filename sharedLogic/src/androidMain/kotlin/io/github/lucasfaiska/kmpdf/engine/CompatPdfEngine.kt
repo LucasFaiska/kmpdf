@@ -1,51 +1,64 @@
 package io.github.lucasfaiska.kmpdf.engine
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
-import android.graphics.pdf.LoadParams
 import android.graphics.pdf.PdfRendererPreV
 import android.graphics.pdf.RenderParams
-import android.os.Build
-import android.os.ParcelFileDescriptor
-import androidx.annotation.RequiresApi
-import androidx.annotation.RequiresExtension
 
-@RequiresApi(Build.VERSION_CODES.R)
-@RequiresExtension(extension = Build.VERSION_CODES.S, version = 13)
 internal class CompatPdfEngine(
-    pfd: ParcelFileDescriptor,
-    password: String?,
+    private val native: NativePdfEngineWrapper,
 ) : AndroidPdfEngine {
-    private val renderer: PdfRendererPreV =
-        if (password != null) {
-            val params: LoadParams = LoadParams.Builder().setPassword(password).build()
-            PdfRendererPreV(pfd, params)
-        } else {
-            PdfRendererPreV(pfd)
-        }
+    override val pageCount: Int get() = native.pageCount
 
-    override val pageCount: Int get() = renderer.pageCount
+    override fun openPage(index: Int): AndroidPdfEnginePage = CompatPdfEnginePage(native.openPage(index))
 
-    override fun openPage(index: Int): AndroidPdfEnginePage = CompatPdfEnginePage(renderer.openPage(index))
+    override fun width(index: Int): Int = openPage(index).use { it.width }
 
-    override fun width(index: Int): Int = renderer.openPage(index).use { page: PdfRendererPreV.Page -> page.width }
+    override fun height(index: Int): Int = openPage(index).use { it.height }
 
-    override fun height(index: Int): Int = renderer.openPage(index).use { page: PdfRendererPreV.Page -> page.height }
+    override fun close() = native.close()
+}
 
+internal class CompatPdfEnginePage(
+    private val native: NativePdfPageWrapper,
+) : AndroidPdfEnginePage {
+    override val width: Int get() = native.width
+
+    override val height: Int get() = native.height
+
+    override fun render(bitmap: Bitmap) = native.render(bitmap)
+
+    override fun close() = native.close()
+}
+
+internal class RealCompatNativeEngine(
+    private val renderer: PdfRendererPreV,
+) : NativePdfEngineWrapper {
+    @SuppressLint("NewApi")
+    override val pageCount: Int = renderer.pageCount
+
+    @SuppressLint("NewApi")
+    override fun openPage(index: Int) = RealCompatNativePage(renderer.openPage(index))
+
+    @SuppressLint("NewApi")
     override fun close() = renderer.close()
 }
 
-@RequiresApi(Build.VERSION_CODES.R)
-@RequiresExtension(extension = Build.VERSION_CODES.S, version = 13)
-private class CompatPdfEnginePage(
+internal class RealCompatNativePage(
     private val page: PdfRendererPreV.Page,
-) : AndroidPdfEnginePage {
-    override val width: Int get() = page.width
-    override val height: Int get() = page.height
+) : NativePdfPageWrapper {
+    @SuppressLint("NewApi")
+    override val width: Int = page.width
 
+    @SuppressLint("NewApi")
+    override val height: Int = page.height
+
+    @SuppressLint("NewApi")
     override fun render(bitmap: Bitmap) {
-        val params: RenderParams = RenderParams.Builder(RenderParams.RENDER_MODE_FOR_DISPLAY).build()
+        val params = RenderParams.Builder(RenderParams.RENDER_MODE_FOR_DISPLAY).build()
         page.render(bitmap, null, null, params)
     }
 
+    @SuppressLint("NewApi")
     override fun close() = page.close()
 }
