@@ -22,8 +22,6 @@ class CompatPdfEngineTest {
     @Test
     fun `given a valid PDF file when compat engine is initialized then it should successfully report page count`() =
         runTest {
-            // PdfRendererPreV might only work on real devices or specific SDK versions in Robolectric
-            // We assume it's available if we are on a version that can run the code
             assumeTrue(Build.VERSION.SDK_INT >= 35)
 
             val file = getSamplePdfFile()
@@ -52,7 +50,6 @@ class CompatPdfEngineTest {
                 assertEquals(841, page.height)
                 page.close()
             } catch (_: Exception) {
-                // Expected if Robolectric's shadow is incomplete for this SDK version
             }
 
             engine.close()

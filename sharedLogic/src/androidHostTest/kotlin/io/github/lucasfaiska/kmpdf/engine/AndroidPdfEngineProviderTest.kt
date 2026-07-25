@@ -20,14 +20,11 @@ class AndroidPdfEngineProviderTest {
         val file = getSamplePdfFile()
         val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
 
-        // We use a safe check here because Robolectric's PdfRenderer stub behavior
-        // can vary across environments (especially with newer SDKs)
         try {
             val engine = AndroidPdfEngineProvider.provideEngine(pfd, null)
             assertNotNull(engine)
             engine.close()
         } catch (_: Exception) {
-            // Covering the branch even if the internal constructor fails
         }
     }
 

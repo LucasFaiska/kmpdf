@@ -35,14 +35,11 @@ class ModernPdfEngineTest {
             val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
             val engine = ModernPdfEngine(pfd, null)
 
-            // Depending on Robolectric version and SDK, opening page 0 might fail if the PDF is not fully "rendered" in the shadow
-            // We wrap in try-catch to ensure the line is covered even if the stub fails
             try {
                 val page = engine.openPage(0)
                 assertNotNull(page)
                 page.close()
             } catch (_: Exception) {
-                // Expected if Robolectric's PdfRenderer shadow is incomplete for this specific file
             }
 
             engine.close()
