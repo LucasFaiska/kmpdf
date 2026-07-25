@@ -231,7 +231,6 @@ fun CustomViewerScreen(
         modifier = Modifier.fillMaxSize().background(Color(0xFFF5F5F5)),
         topBar = {
             val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-            // A totally custom toolbar without Material 3
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -277,7 +276,6 @@ fun CustomViewerScreen(
             }
         },
         passwordDialog = { isInvalid, onConfirm ->
-            // A totally custom password dialog without Material 3 AlertDialog
             Box(
                 modifier = Modifier
                     .fillMaxSize()
