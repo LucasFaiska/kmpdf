@@ -21,33 +21,52 @@ class AndroidPdfReader(
         password: String?,
     ): PdfLoadStatus =
         withContext(dispatcher) {
-            val tempFile = File.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX, context.cacheDir)
+            val tempFile = createTempFile()
             try {
-                FileOutputStream(tempFile).use { it.write(bytes) }
-                val pfd = ParcelFileDescriptor.open(tempFile, ParcelFileDescriptor.MODE_READ_ONLY)
-
-                try {
-                    val engine = AndroidPdfEngineProvider.provideEngine(pfd, password)
-                    PdfLoadStatus.Success(AndroidPdfDocument(engine, tempFile, dispatcher))
-                } catch (_: SecurityException) {
-                    pfd.close()
-                    if (password == null) PdfLoadStatus.PasswordRequired else PdfLoadStatus.InvalidPassword
-                } catch (e: Exception) {
-                    pfd.close()
-                    val errorType =
-                        when {
-                            e.message?.contains("format", ignoreCase = true) == true ||
-                                e.message?.contains("corrupt", ignoreCase = true) == true -> PdfErrorType.CORRUPTED
-                            e.message?.contains("unsupported", ignoreCase = true) == true -> PdfErrorType.UNSUPPORTED
-                            else -> PdfErrorType.GENERIC
-                        }
-                    PdfLoadStatus.Error(PdfError(errorType, e.message, e))
-                }
+                writeBytesToFile(tempFile, bytes)
+                openAndProcessPdf(tempFile, password)
             } catch (e: Exception) {
-                if (tempFile.exists()) tempFile.delete()
-                PdfLoadStatus.Error(PdfError(PdfErrorType.IO_ERROR, e.message, e))
+                handleGlobalError(tempFile, e)
             }
         }
+
+    private fun createTempFile(): File = File.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX, context.cacheDir)
+
+    private fun writeBytesToFile(
+        file: File,
+        bytes: ByteArray,
+    ) = FileOutputStream(file).use { it.write(bytes) }
+
+    private fun openAndProcessPdf(
+        tempFile: File,
+        password: String?,
+    ): PdfLoadStatus {
+        val pfd = ParcelFileDescriptor.open(tempFile, ParcelFileDescriptor.MODE_READ_ONLY)
+        return try {
+            val engine = AndroidPdfEngineProvider.provideEngine(pfd, password)
+            PdfLoadStatus.Success(AndroidPdfDocument(engine, tempFile, dispatcher))
+        } catch (e: Exception) {
+            pfd.close()
+            handlePdfEngineError(e, password)
+        }
+    }
+
+    private fun handlePdfEngineError(
+        e: Exception,
+        password: String?,
+    ): PdfLoadStatus =
+        when (e) {
+            is SecurityException -> if (password == null) PdfLoadStatus.PasswordRequired else PdfLoadStatus.InvalidPassword
+            else -> PdfLoadStatus.Error(PdfError(PdfErrorType.GENERIC, e.message, e))
+        }
+
+    private fun handleGlobalError(
+        tempFile: File,
+        e: Exception,
+    ): PdfLoadStatus {
+        if (tempFile.exists()) tempFile.delete()
+        return PdfLoadStatus.Error(PdfError(PdfErrorType.IO_ERROR, e.message, e))
+    }
 
     private companion object {
         private const val TEMP_FILE_PREFIX = "kmpdf_"
