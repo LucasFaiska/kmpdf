@@ -6,6 +6,7 @@ import io.github.lucasfaiska.kmpdf.model.PdfLoadStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -49,7 +50,7 @@ class AndroidPdfReaderErrorTest {
 
             assertTrue(result is PdfLoadStatus.Error)
             assertEquals(PdfErrorType.IO_ERROR, (result as PdfLoadStatus.Error).error.type)
-            assertTrue(!tempFile.exists())
+            assertFalse(tempFile.exists())
         }
 
     private fun invokeHandlePdfEngineError(

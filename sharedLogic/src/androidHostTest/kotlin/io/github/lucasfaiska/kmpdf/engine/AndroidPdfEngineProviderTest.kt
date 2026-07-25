@@ -3,6 +3,7 @@ package io.github.lucasfaiska.kmpdf.engine
 import android.os.ParcelFileDescriptor
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -16,13 +17,29 @@ class AndroidPdfEngineProviderTest {
 
     @Test
     @Config(sdk = [34])
-    fun `given api 34 when providing engine then it should successfully return an engine instance`() {
+    fun `given api 34 when providing engine then it should successfully return a modern engine instance`() {
         val file = getSamplePdfFile()
         val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
 
         try {
             val engine = AndroidPdfEngineProvider.provideEngine(pfd, null)
             assertNotNull(engine)
+            assertTrue(engine is ModernPdfEngine)
+            engine.close()
+        } catch (_: Exception) {
+        }
+    }
+
+    @Test
+    @Config(sdk = [28])
+    fun `given api 28 when providing engine then it should return an engine instance`() {
+        val file = getSamplePdfFile()
+        val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+
+        try {
+            val engine = AndroidPdfEngineProvider.provideEngine(pfd, null)
+            assertNotNull(engine)
+            assertTrue(engine is ModernPdfEngine)
             engine.close()
         } catch (_: Exception) {
         }

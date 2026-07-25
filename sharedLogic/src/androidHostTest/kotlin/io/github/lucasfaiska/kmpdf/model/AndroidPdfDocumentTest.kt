@@ -6,7 +6,9 @@ import io.github.lucasfaiska.kmpdf.engine.AndroidPdfEnginePage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -75,8 +77,4 @@ class AndroidPdfDocumentTest {
 
             document.close()
         }
-
-    private fun assertTrue(condition: Boolean) = org.junit.Assert.assertTrue(condition)
-
-    private fun assertFalse(condition: Boolean) = org.junit.Assert.assertFalse(condition)
 }

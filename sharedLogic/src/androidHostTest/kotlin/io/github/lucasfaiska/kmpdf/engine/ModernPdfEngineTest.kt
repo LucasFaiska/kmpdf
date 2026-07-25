@@ -2,6 +2,7 @@ package io.github.lucasfaiska.kmpdf.engine
 
 import android.graphics.Bitmap
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,7 +42,7 @@ class ModernPdfEngineTest {
     }
 
     @Test
-    fun `given a fake native engine when modern engine is used then it should proxy properties correctly`() {
+    fun `given a fake native engine when modern engine is used then it should proxy properties and open pages correctly`() {
         val fakeNative = FakeNativeEngine()
         val engine = ModernPdfEngine(fakeNative)
 
@@ -50,6 +51,7 @@ class ModernPdfEngineTest {
         assertEquals(200, engine.height(0))
 
         val page = engine.openPage(0)
+        assertNotNull(page)
         assertEquals(100, page.width)
         assertEquals(200, page.height)
 
