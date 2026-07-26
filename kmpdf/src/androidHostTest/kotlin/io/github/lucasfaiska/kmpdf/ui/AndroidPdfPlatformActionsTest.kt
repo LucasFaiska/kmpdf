@@ -111,7 +111,6 @@ class AndroidPdfPlatformActionsTest {
         val source = PdfSource.Local(uri.toString())
         val content = "content uri data"
 
-        // Register a test provider that returns our custom cursor and stream
         TestContentProvider.instance = TestContentProvider("real_name.pdf", content.toByteArray(), app.cacheDir)
         Robolectric.setupContentProvider(TestContentProvider::class.java, authority)
 
@@ -149,9 +148,6 @@ class AndroidPdfPlatformActionsTest {
         assertEquals("invalid-path", targetIntent?.getStringExtra(Intent.EXTRA_TEXT))
     }
 
-    /**
-     * A simple ContentProvider for testing purposes.
-     */
     class TestContentProvider() : ContentProvider() {
         companion object {
             var instance: TestContentProvider? = null
