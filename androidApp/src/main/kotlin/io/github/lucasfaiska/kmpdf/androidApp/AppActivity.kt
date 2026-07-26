@@ -32,11 +32,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.lucasfaiska.kmpdf.androidApp.ui.CustomViewerScreen
-import io.github.lucasfaiska.kmpdf.material3.Material3LoadingContent
-import io.github.lucasfaiska.kmpdf.material3.Material3PasswordDialog
-import io.github.lucasfaiska.kmpdf.material3.Material3PdfToolbar
 import io.github.lucasfaiska.kmpdf.model.PdfSource
 import io.github.lucasfaiska.kmpdf.ui.PdfViewer
+import io.github.lucasfaiska.kmpdf.ui.material3.Material3LoadingContent
+import io.github.lucasfaiska.kmpdf.ui.material3.Material3PasswordDialog
+import io.github.lucasfaiska.kmpdf.ui.material3.Material3PdfToolbar
 import io.github.lucasfaiska.kmpdf.ui.rememberPdfRepository
 import io.github.lucasfaiska.kmpdf.ui.rememberPdfViewerState
 

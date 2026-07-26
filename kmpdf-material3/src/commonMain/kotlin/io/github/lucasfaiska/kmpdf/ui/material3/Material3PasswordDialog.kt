@@ -1,4 +1,4 @@
-package io.github.lucasfaiska.kmpdf.material3
+package io.github.lucasfaiska.kmpdf.ui.material3
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -23,11 +23,16 @@ import androidx.compose.ui.unit.dp
 
 /**
  * Material 3 implementation of the password dialog for protected PDF documents.
+ *
+ * @param isInvalid Whether the last password attempt was invalid.
+ * @param onConfirm Callback when the password is confirmed.
+ * @param labels The labels to be used for text in the dialog.
  */
 @Composable
 fun Material3PasswordDialog(
     isInvalid: Boolean,
     onConfirm: (String) -> Unit,
+    labels: PasswordDialogLabels = PasswordDialogLabels(),
 ) {
     var password by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
@@ -38,15 +43,10 @@ fun Material3PasswordDialog(
 
     AlertDialog(
         onDismissRequest = {},
-        title = { Text("Password Required") },
+        title = { Text(labels.title) },
         text = {
             Column {
-                val message =
-                    if (isInvalid) {
-                        "Incorrect password. Please try again."
-                    } else {
-                        "This document is protected. Please enter the password."
-                    }
+                val message = if (isInvalid) labels.errorMessage else labels.message
                 Text(
                     message,
                     color = if (isInvalid) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
@@ -55,7 +55,7 @@ fun Material3PasswordDialog(
                 TextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Password") },
+                    label = { Text(labels.textFieldLabel) },
                     visualTransformation = PasswordVisualTransformation(),
                     singleLine = true,
                     isError = isInvalid,
@@ -71,7 +71,7 @@ fun Material3PasswordDialog(
                 onClick = { onConfirm(password) },
                 enabled = password.isNotBlank(),
             ) {
-                Text("Open")
+                Text(labels.confirmButton)
             }
         },
     )

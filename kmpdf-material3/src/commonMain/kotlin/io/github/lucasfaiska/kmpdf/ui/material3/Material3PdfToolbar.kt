@@ -1,4 +1,4 @@
-package io.github.lucasfaiska.kmpdf.material3
+package io.github.lucasfaiska.kmpdf.ui.material3
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -28,12 +28,18 @@ import io.github.lucasfaiska.kmpdf.ui.rememberPdfPlatformActions
 
 /**
  * Material 3 implementation of the PDF toolbar.
+ *
+ * @param state The state object for the PDF viewer.
+ * @param source The source of the PDF document.
+ * @param modifier The modifier to be applied to the layout.
+ * @param labels The labels to be used for accessibility and text.
  */
 @Composable
 fun Material3PdfToolbar(
     state: PdfViewerState,
     source: PdfSource,
     modifier: Modifier = Modifier,
+    labels: PdfToolbarLabels = PdfToolbarLabels(),
 ) {
     val platformActions = rememberPdfPlatformActions()
 
@@ -52,20 +58,20 @@ fun Material3PdfToolbar(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { state.scrollToPage(state.currentPage - 2) }) {
-                    Icon(imageVector = Icons.Default.KeyboardArrowUp, contentDescription = "Página Anterior")
+                    Icon(imageVector = Icons.Default.KeyboardArrowUp, contentDescription = labels.previousPage)
                 }
                 Text(
                     text = "${state.currentPage} / ${state.pageCount}",
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 IconButton(onClick = { state.scrollToPage(state.currentPage) }) {
-                    Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = "Próxima Página")
+                    Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = labels.nextPage)
                 }
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { state.zoomOut() }) {
-                    Icon(imageVector = Icons.Default.KeyboardArrowLeft, contentDescription = "Diminuir Zoom")
+                    Icon(imageVector = Icons.Default.KeyboardArrowLeft, contentDescription = labels.zoomOut)
                 }
                 Text(
                     text = "${(state.zoomScale * 100).toInt()}%",
@@ -73,21 +79,21 @@ fun Material3PdfToolbar(
                     modifier = Modifier.widthIn(min = 40.dp),
                 )
                 IconButton(onClick = { state.zoomIn() }) {
-                    Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = "Aumentar Zoom")
+                    Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = labels.zoomIn)
                 }
                 IconButton(onClick = { state.resetZoom() }) {
-                    Icon(imageVector = Icons.Default.Refresh, contentDescription = "Resetar Zoom")
+                    Icon(imageVector = Icons.Default.Refresh, contentDescription = labels.resetZoom)
                 }
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (source is PdfSource.Url) {
                     IconButton(onClick = { platformActions.download(source.url) }) {
-                        Icon(imageVector = Icons.Default.Download, contentDescription = "Download")
+                        Icon(imageVector = Icons.Default.Download, contentDescription = labels.download)
                     }
                 }
                 IconButton(onClick = { platformActions.share(source) }) {
-                    Icon(imageVector = Icons.Default.Share, contentDescription = "Compartilhar")
+                    Icon(imageVector = Icons.Default.Share, contentDescription = labels.share)
                 }
             }
         }

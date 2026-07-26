@@ -1,4 +1,4 @@
-package io.github.lucasfaiska.kmpdf.material3
+package io.github.lucasfaiska.kmpdf.ui.material3
 
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable

@@ -60,7 +60,9 @@ fun PdfViewer(
     }
 
     Column(modifier = modifier) {
-        topBar()
+        if (!state.loading && state.error == null) {
+            topBar()
+        }
         Box(
             modifier = Modifier.weight(1f).fillMaxWidth(),
             contentAlignment = Alignment.Center,
@@ -82,7 +84,9 @@ fun PdfViewer(
                 }
             }
         }
-        bottomBar()
+        if (!state.loading && state.error == null) {
+            bottomBar()
+        }
     }
 }
 
