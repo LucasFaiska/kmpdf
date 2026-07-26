@@ -1,10 +1,12 @@
 package io.github.lucasfaiska.kmpdf.ui
 
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import io.github.lucasfaiska.kmpdf.model.PdfDocument
 import io.github.lucasfaiska.kmpdf.model.PdfError
 import io.github.lucasfaiska.kmpdf.model.PdfErrorType
 import io.mockk.every
@@ -87,9 +89,12 @@ class PdfViewerTest {
     @Test
     fun `given document loaded when viewing then it should show bars`() {
         val mockState = mockk<PdfViewerState>(relaxed = true)
+        val mockDocument = mockk<PdfDocument>()
         every { mockState.loading } returns false
         every { mockState.error } returns null
-        every { mockState.document } returns mockk()
+        every { mockState.document } returns mockDocument
+        every { mockState.lazyListState } returns LazyListState()
+        every { mockDocument.pageCount } returns 5
 
         composeTestRule.setContent {
             PdfViewer(
