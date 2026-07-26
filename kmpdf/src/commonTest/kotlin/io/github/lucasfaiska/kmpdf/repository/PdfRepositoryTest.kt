@@ -2,6 +2,7 @@ package io.github.lucasfaiska.kmpdf.repository
 
 import io.github.lucasfaiska.kmpdf.loader.PdfLoader
 import io.github.lucasfaiska.kmpdf.model.PdfDocument
+import io.github.lucasfaiska.kmpdf.model.PdfError
 import io.github.lucasfaiska.kmpdf.model.PdfErrorType
 import io.github.lucasfaiska.kmpdf.model.PdfLoadStatus
 import io.github.lucasfaiska.kmpdf.model.PdfSource
@@ -66,6 +67,47 @@ class PdfRepositoryTest {
             assertEquals(expectedBytes, reader.lastBytes)
             assertEquals(password, reader.lastPassword)
             assertEquals(reader.resultStatus, result)
+        }
+
+    @Test
+    fun `given reader returns password required when loading then it should return password required status`() =
+        runTest {
+            val loader = MockPdfLoader()
+            val reader = MockPdfReader()
+            reader.resultStatus = PdfLoadStatus.PasswordRequired
+            val repository = PdfRepositoryImpl(loader, reader)
+
+            val result = repository.loadDocument(PdfSource.Local("test"))
+
+            assertEquals(PdfLoadStatus.PasswordRequired, result)
+        }
+
+    @Test
+    fun `given reader returns invalid password when loading then it should return invalid password status`() =
+        runTest {
+            val loader = MockPdfLoader()
+            val reader = MockPdfReader()
+            reader.resultStatus = PdfLoadStatus.InvalidPassword
+            val repository = PdfRepositoryImpl(loader, reader)
+
+            val result = repository.loadDocument(PdfSource.Local("test"), "wrong")
+
+            assertEquals(PdfLoadStatus.InvalidPassword, result)
+        }
+
+    @Test
+    fun `given reader returns error when loading then it should return error status`() =
+        runTest {
+            val loader = MockPdfLoader()
+            val reader = MockPdfReader()
+            val error = PdfError(PdfErrorType.CORRUPTED)
+            reader.resultStatus = PdfLoadStatus.Error(error)
+            val repository = PdfRepositoryImpl(loader, reader)
+
+            val result = repository.loadDocument(PdfSource.Local("test"))
+
+            assertTrue(result is PdfLoadStatus.Error)
+            assertEquals(error, result.error)
         }
 
     @Test

@@ -151,6 +151,26 @@ class PdfViewerStateTest {
         }
 
     @Test
+    fun `given a repository that throws when loading then it should handle generic error`() =
+        testScope.runTest {
+            val repository =
+                object : PdfRepository {
+                    override suspend fun loadDocument(
+                        source: PdfSource,
+                        password: String?,
+                    ) = throw RuntimeException("CRASH")
+                }
+            val state = PdfViewerState(PdfPageCacheImpl(5), this)
+
+            state.load(PdfSource.Local("crash"), repository)
+            advanceUntilIdle()
+
+            assertFalse(state.loading)
+            assertNotNull(state.error)
+            assertEquals("CRASH", state.error?.message)
+        }
+
+    @Test
     fun `given a protected document when loading without password then it should require password`() =
         testScope.runTest {
             val repository = MockPdfRepository().apply { requiredPassword = true }
@@ -214,7 +234,6 @@ class PdfViewerStateTest {
             )
             advanceUntilIdle()
 
-            // Just verifying state properties since animation is hard to test in unit tests
             assertEquals(5, state.pageCount)
             assertEquals(1, state.currentPage)
         }
@@ -224,7 +243,7 @@ class PdfViewerStateTest {
         val state = PdfViewerState(PdfPageCacheImpl(5), testScope)
         val containerSize = IntSize(100, 100)
 
-        state.updateZoom(2.0f) // zoomScale = 2.0
+        state.updateZoom(2.0f)
 
         state.updateOffset(Offset(20f, 20f), containerSize)
         assertEquals(20f, state.offset.x)
@@ -233,6 +252,14 @@ class PdfViewerStateTest {
         state.updateOffset(Offset(100f, 100f), containerSize)
         assertEquals(50f, state.offset.x)
         assertEquals(50f, state.offset.y)
+    }
+
+    @Test
+    fun `given scale is 1 when updating offset then it should reset to zero`() {
+        val state = PdfViewerState(PdfPageCacheImpl(5), testScope)
+        state.updateOffset(Offset(10f, 10f), IntSize(100, 100))
+        assertEquals(0f, state.offset.x)
+        assertEquals(0f, state.offset.y)
     }
 
     @Test
