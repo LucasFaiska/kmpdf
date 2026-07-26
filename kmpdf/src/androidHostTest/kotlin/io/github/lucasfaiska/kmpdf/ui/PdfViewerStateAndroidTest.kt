@@ -31,47 +31,51 @@ class PdfViewerStateAndroidTest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun `given document loaded when calling getPage then it should trigger render and cache`() = runTest {
-        val mockPage = mockk<PdfPage>(relaxed = true)
-        val mockDocument = mockk<PdfDocument>(relaxed = true)
-        val testBytes = ByteArray(10 * 10 * 4)
+    fun `given document loaded when calling getPage then it should trigger render and cache`() =
+        runTest {
+            val mockPage = mockk<PdfPage>(relaxed = true)
+            val mockDocument = mockk<PdfDocument>(relaxed = true)
+            val testBytes = ByteArray(10 * 10 * 4) // Small for test
 
-        every { mockDocument.pageCount } returns 1
-        every { mockDocument.getPage(0) } returns mockPage
-        coEvery { mockPage.render(10, 10) } returns testBytes
+            every { mockDocument.pageCount } returns 1
+            every { mockDocument.getPage(0) } returns mockPage
+            coEvery { mockPage.render(10, 10) } returns testBytes
 
-        val repository = mockk<PdfRepository>()
-        coEvery { repository.loadDocument(any(), any()) } returns PdfLoadStatus.Success(mockDocument)
+            val repository = mockk<PdfRepository>()
+            coEvery { repository.loadDocument(any(), any()) } returns PdfLoadStatus.Success(mockDocument)
 
-        val state = PdfViewerState(PdfPageCacheImpl(5), this)
-        state.load(PdfSource.Local("test"), repository)
-        advanceUntilIdle()
+            val state = PdfViewerState(PdfPageCacheImpl(5), this)
+            state.load(PdfSource.Local("test"), repository)
+            advanceUntilIdle()
 
-        var bitmap: ImageBitmap? = null
-        composeTestRule.setContent {
-            bitmap = state.getPage(0, 10, 10)
+            var bitmap: ImageBitmap? = null
+            composeTestRule.setContent {
+                bitmap = state.getPage(0, 10, 10)
+            }
+
+            // Initial call should return null because render happens in side effect
+            assertNull(bitmap)
+
+            // Run LaunchedEffect
+            composeTestRule.waitForIdle()
+
+            // Call again, should be in cache now
+            composeTestRule.setContent {
+                bitmap = state.getPage(0, 10, 10)
+            }
+            assertNotNull(bitmap)
         }
-
-        assertNull(bitmap)
-
-        composeTestRule.waitForIdle()
-
-        composeTestRule.setContent {
-            bitmap = state.getPage(0, 10, 10)
-        }
-        assertNotNull(bitmap)
-    }
 
     @Test
     fun `given invalid dimensions when calling getPage then it should return null`() {
         val state = PdfViewerState(PdfPageCacheImpl(5), TestScope())
         var bitmap: ImageBitmap? = ImageBitmap(1, 1) // Just to check it changes to null
-        
+
         composeTestRule.setContent {
             bitmap = state.getPage(0, 0, 10)
         }
         assertNull(bitmap)
-        
+
         composeTestRule.setContent {
             bitmap = state.getPage(0, 10, -1)
         }
