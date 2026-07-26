@@ -8,8 +8,6 @@ import androidx.compose.ui.Modifier
  * Material 3 implementation of the loading content using a [CircularProgressIndicator].
  */
 @Composable
-fun Material3LoadingContent(
-    modifier: Modifier = Modifier,
-) {
+fun Material3LoadingContent(modifier: Modifier = Modifier) {
     CircularProgressIndicator(modifier = modifier)
 }
