@@ -14,7 +14,7 @@ import androidx.compose.runtime.Immutable
  * @property download Accessibility description for the download button.
  */
 @Immutable
-data class PdfToolbarLabels(
+data class Material3PdfToolbarLabels(
     val previousPage: String = "Previous Page",
     val nextPage: String = "Next Page",
     val zoomIn: String = "Zoom In",

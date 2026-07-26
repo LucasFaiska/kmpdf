@@ -12,7 +12,7 @@ import androidx.compose.runtime.Immutable
  * @property confirmButton The text for the confirm button.
  */
 @Immutable
-data class PasswordDialogLabels(
+data class Material3PasswordDialogLabels(
     val title: String = "Password Required",
     val message: String = "This document is protected. Please enter the password.",
     val errorMessage: String = "Incorrect password. Please try again.",

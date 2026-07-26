@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 fun Material3PasswordDialog(
     isInvalid: Boolean,
     onConfirm: (String) -> Unit,
-    labels: PasswordDialogLabels = PasswordDialogLabels(),
+    labels: Material3PasswordDialogLabels = Material3PasswordDialogLabels(),
 ) {
     var password by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }

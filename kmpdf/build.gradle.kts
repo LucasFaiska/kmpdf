@@ -58,6 +58,8 @@ kotlin {
                 implementation(libs.androidx.test.junit)
                 implementation(libs.kotlinx.coroutines.test)
                 implementation(libs.compose.ui.test)
+                implementation(libs.compose.ui.test.junit4)
+                implementation(libs.androidx.activityCompose)
                 implementation(libs.mockk)
             }
         }

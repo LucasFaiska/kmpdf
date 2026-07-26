@@ -39,7 +39,7 @@ fun Material3PdfToolbar(
     state: PdfViewerState,
     source: PdfSource,
     modifier: Modifier = Modifier,
-    labels: PdfToolbarLabels = PdfToolbarLabels(),
+    labels: Material3PdfToolbarLabels = Material3PdfToolbarLabels(),
 ) {
     val platformActions = rememberPdfPlatformActions()
 
