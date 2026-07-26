@@ -78,12 +78,10 @@ class PdfViewerTest {
             PdfViewer(
                 state = mockState,
                 topBar = { BasicText("TOP") },
-                bottomBar = { BasicText("BOTTOM") },
             )
         }
 
         composeTestRule.onNodeWithText("TOP").assertIsNotDisplayed()
-        composeTestRule.onNodeWithText("BOTTOM").assertIsNotDisplayed()
     }
 
     @Test
@@ -97,11 +95,9 @@ class PdfViewerTest {
             PdfViewer(
                 state = mockState,
                 topBar = { BasicText("TOP") },
-                bottomBar = { BasicText("BOTTOM") },
             )
         }
 
         composeTestRule.onNodeWithText("TOP").assertIsDisplayed()
-        composeTestRule.onNodeWithText("BOTTOM").assertIsDisplayed()
     }
 }

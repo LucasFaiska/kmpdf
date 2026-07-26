@@ -36,7 +36,6 @@ import io.github.lucasfaiska.kmpdf.model.PdfSource
  * @param state The state object that manages the PDF document and its display properties.
  * @param modifier The modifier to be applied to the layout.
  * @param topBar The content to be shown at the top of the viewer.
- * @param bottomBar The content to be shown at the bottom of the viewer.
  * @param loadingContent The content to be shown while the document is loading.
  * @param errorContent The content to be shown if an error occurs.
  * @param passwordDialog The content to be shown when a password is required.
@@ -46,7 +45,6 @@ fun PdfViewer(
     state: PdfViewerState,
     modifier: Modifier = Modifier,
     topBar: @Composable () -> Unit = {},
-    bottomBar: @Composable () -> Unit = {},
     loadingContent: @Composable () -> Unit = {},
     errorContent: @Composable (PdfError) -> Unit = {},
     passwordDialog: @Composable (isInvalid: Boolean, onConfirm: (String) -> Unit) -> Unit = { _, _ -> },
@@ -84,9 +82,6 @@ fun PdfViewer(
                 }
             }
         }
-        if (!state.loading && state.error == null) {
-            bottomBar()
-        }
     }
 }
 
@@ -98,7 +93,6 @@ internal fun PdfViewer(
     url: String,
     modifier: Modifier = Modifier,
     topBar: @Composable () -> Unit = {},
-    bottomBar: @Composable () -> Unit = {},
     loadingContent: @Composable () -> Unit = {},
     errorContent: @Composable (PdfError) -> Unit = {},
     passwordDialog: @Composable (isInvalid: Boolean, onConfirm: (String) -> Unit) -> Unit = { _, _ -> },
@@ -107,7 +101,6 @@ internal fun PdfViewer(
         source = PdfSource.Url(url),
         modifier = modifier,
         topBar = topBar,
-        bottomBar = bottomBar,
         loadingContent = loadingContent,
         errorContent = errorContent,
         passwordDialog = passwordDialog,
@@ -122,7 +115,6 @@ internal fun PdfViewer(
     modifier: Modifier = Modifier,
     identifier: String,
     topBar: @Composable () -> Unit = {},
-    bottomBar: @Composable () -> Unit = {},
     loadingContent: @Composable () -> Unit = {},
     errorContent: @Composable (PdfError) -> Unit = {},
     passwordDialog: @Composable (isInvalid: Boolean, onConfirm: (String) -> Unit) -> Unit = { _, _ -> },
@@ -131,7 +123,6 @@ internal fun PdfViewer(
         source = PdfSource.Local(identifier),
         modifier = modifier,
         topBar = topBar,
-        bottomBar = bottomBar,
         loadingContent = loadingContent,
         errorContent = errorContent,
         passwordDialog = passwordDialog,
@@ -146,7 +137,6 @@ internal fun PdfViewer(
     source: PdfSource,
     modifier: Modifier = Modifier,
     topBar: @Composable () -> Unit = {},
-    bottomBar: @Composable () -> Unit = {},
     loadingContent: @Composable () -> Unit = {},
     errorContent: @Composable (PdfError) -> Unit = {},
     passwordDialog: @Composable (isInvalid: Boolean, onConfirm: (String) -> Unit) -> Unit = { _, _ -> },
@@ -162,7 +152,6 @@ internal fun PdfViewer(
         state = state,
         modifier = modifier,
         topBar = topBar,
-        bottomBar = bottomBar,
         loadingContent = loadingContent,
         errorContent = errorContent,
         passwordDialog = passwordDialog,
