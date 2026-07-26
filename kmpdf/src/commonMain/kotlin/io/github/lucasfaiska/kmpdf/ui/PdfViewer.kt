@@ -94,7 +94,7 @@ fun PdfViewer(
  * High-level Composable to display a PDF document from a URL.
  */
 @Composable
-fun PdfViewer(
+internal fun PdfViewer(
     url: String,
     modifier: Modifier = Modifier,
     topBar: @Composable () -> Unit = {},
@@ -118,7 +118,7 @@ fun PdfViewer(
  * High-level Composable to display a PDF document from a local identifier.
  */
 @Composable
-fun PdfViewer(
+internal fun PdfViewer(
     modifier: Modifier = Modifier,
     identifier: String,
     topBar: @Composable () -> Unit = {},
@@ -142,7 +142,7 @@ fun PdfViewer(
  * High-level Composable to display a PDF document from a [PdfSource].
  */
 @Composable
-fun PdfViewer(
+internal fun PdfViewer(
     source: PdfSource,
     modifier: Modifier = Modifier,
     topBar: @Composable () -> Unit = {},
