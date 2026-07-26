@@ -1,11 +1,14 @@
 package io.github.lucasfaiska.kmpdf.ui
 
 import android.app.Application
-import android.content.ContentResolver
+import android.content.ContentProvider
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
-import android.content.res.AssetManager
+import android.database.Cursor
+import android.database.MatrixCursor
 import android.net.Uri
+import android.os.ParcelFileDescriptor
 import android.provider.OpenableColumns
 import androidx.core.content.FileProvider
 import androidx.test.core.app.ApplicationProvider
@@ -21,12 +24,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
-import org.robolectric.fakes.RoboCursor
 import java.io.ByteArrayInputStream
 import java.io.File
+import java.io.FileOutputStream
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
@@ -56,7 +60,7 @@ class AndroidPdfPlatformActionsTest {
         assertNotNull(nextActivity)
         assertEquals(Intent.ACTION_CHOOSER, nextActivity.action)
 
-        val targetIntent = nextActivity.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
+        val targetIntent = nextActivity.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java)
         assertNotNull(targetIntent)
         assertEquals(Intent.ACTION_SEND, targetIntent?.action)
         assertEquals("https://example.com/test.pdf", targetIntent?.getStringExtra(Intent.EXTRA_TEXT))
@@ -71,10 +75,10 @@ class AndroidPdfPlatformActionsTest {
         actions.share(source)
 
         val nextActivity = shadowOf(app).nextStartedActivity
-        val targetIntent = nextActivity.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
+        val targetIntent = nextActivity.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java)
 
         assertEquals(Intent.ACTION_SEND, targetIntent?.action)
-        assertEquals(mockUri, targetIntent?.getParcelableExtra(Intent.EXTRA_STREAM))
+        assertEquals(mockUri, targetIntent?.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java))
         assertEquals("application/pdf", targetIntent?.type)
         val flags = targetIntent?.flags ?: 0
         assertTrue((flags and Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0)
@@ -86,7 +90,7 @@ class AndroidPdfPlatformActionsTest {
         val source = PdfSource.Local("file:///android_asset/$assetPath")
         val content = "asset content"
 
-        val mockAssets = mockk<AssetManager>()
+        val mockAssets = mockk<android.content.res.AssetManager>()
         val mockContext = mockk<Context>(relaxed = true)
         every { mockContext.assets } returns mockAssets
         every { mockContext.cacheDir } returns app.cacheDir
@@ -102,27 +106,16 @@ class AndroidPdfPlatformActionsTest {
 
     @Test
     fun `given content uri source when sharing then it should query name and copy to cache`() {
-        val uri = Uri.parse("content://authority/document.pdf")
+        val authority = "authority"
+        val uri = Uri.parse("content://$authority/document.pdf")
         val source = PdfSource.Local(uri.toString())
         val content = "content uri data"
 
-        val mockResolver = mockk<ContentResolver>()
-        val mockContext = mockk<Context>(relaxed = true)
-        every { mockContext.contentResolver } returns mockResolver
-        every { mockContext.cacheDir } returns app.cacheDir
+        // Register a test provider that returns our custom cursor and stream
+        TestContentProvider.instance = TestContentProvider("real_name.pdf", content.toByteArray(), app.cacheDir)
+        Robolectric.setupContentProvider(TestContentProvider::class.java, authority)
 
-        @Suppress("DEPRECATION")
-        val cursor = RoboCursor()
-        cursor.setColumnNames(listOf(OpenableColumns.DISPLAY_NAME))
-        cursor.setResults(arrayOf(arrayOf("real_name.pdf")))
-
-        @Suppress("DEPRECATION")
-        shadowOf(app.contentResolver).setCursor(uri, cursor)
-        every { mockResolver.query(uri, any(), any(), any(), any()) } returns cursor
-        every { mockResolver.openInputStream(uri) } returns ByteArrayInputStream(content.toByteArray())
-
-        val contentActions = AndroidPdfPlatformActions(mockContext)
-        contentActions.share(source)
+        actions.share(source)
 
         val cacheFile = File(app.cacheDir, "real_name.pdf")
         assertTrue(cacheFile.exists())
@@ -150,9 +143,53 @@ class AndroidPdfPlatformActionsTest {
         actions.share(source)
 
         val nextActivity = shadowOf(app).nextStartedActivity
-        val targetIntent = nextActivity.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
+        val targetIntent = nextActivity.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java)
 
         assertEquals(Intent.ACTION_SEND, targetIntent?.action)
         assertEquals("invalid-path", targetIntent?.getStringExtra(Intent.EXTRA_TEXT))
+    }
+
+    /**
+     * A simple ContentProvider for testing purposes.
+     */
+    class TestContentProvider() : ContentProvider() {
+        companion object {
+            var instance: TestContentProvider? = null
+        }
+
+        var fileName: String = "document.pdf"
+        var data: ByteArray = byteArrayOf()
+        var cacheDir: File? = null
+
+        constructor(fileName: String, data: ByteArray, cacheDir: File) : this() {
+            this.fileName = fileName
+            this.data = data
+            this.cacheDir = cacheDir
+        }
+
+        override fun onCreate(): Boolean = true
+
+        override fun query(
+            uri: Uri,
+            projection: Array<out String>?,
+            selection: String?,
+            selectionArgs: Array<out String>?,
+            sortOrder: String?,
+        ): Cursor {
+            val cursor = MatrixCursor(arrayOf(OpenableColumns.DISPLAY_NAME))
+            cursor.addRow(arrayOf(instance?.fileName ?: fileName))
+            return cursor
+        }
+
+        override fun openFile(uri: Uri, mode: String): ParcelFileDescriptor? {
+            val file = File(instance?.cacheDir ?: cacheDir, "temp_provider_file.pdf")
+            FileOutputStream(file).use { it.write(instance?.data ?: data) }
+            return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+        }
+
+        override fun getType(uri: Uri): String? = null
+        override fun insert(uri: Uri, values: ContentValues?): Uri? = null
+        override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int = 0
+        override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<out String>?): Int = 0
     }
 }
