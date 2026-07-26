@@ -34,7 +34,7 @@ class PdfViewerStateAndroidTest {
     fun `given document loaded when calling getPage then it should trigger render and cache`() = runTest {
         val mockPage = mockk<PdfPage>(relaxed = true)
         val mockDocument = mockk<PdfDocument>(relaxed = true)
-        val testBytes = ByteArray(10 * 10 * 4) // Small for test
+        val testBytes = ByteArray(10 * 10 * 4)
 
         every { mockDocument.pageCount } returns 1
         every { mockDocument.getPage(0) } returns mockPage
@@ -52,13 +52,10 @@ class PdfViewerStateAndroidTest {
             bitmap = state.getPage(0, 10, 10)
         }
 
-        // Initial call should return null because render happens in side effect
         assertNull(bitmap)
 
-        // Run LaunchedEffect
         composeTestRule.waitForIdle()
 
-        // Call again, should be in cache now
         composeTestRule.setContent {
             bitmap = state.getPage(0, 10, 10)
         }
