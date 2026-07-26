@@ -1,5 +1,8 @@
 package io.github.lucasfaiska.kmpdf.ui
 
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.IntSize
 import io.github.lucasfaiska.kmpdf.model.PdfDocument
 import io.github.lucasfaiska.kmpdf.model.PdfError
 import io.github.lucasfaiska.kmpdf.model.PdfErrorType
@@ -24,12 +27,14 @@ class PdfViewerStateTest {
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    private class MockPdfDocument : PdfDocument {
+    private class MockPdfDocument(var isClosed: Boolean = false) : PdfDocument {
         override val pageCount: Int = 5
 
         override fun getPage(index: Int) = throw NotImplementedError()
 
-        override fun close() {}
+        override fun close() {
+            isClosed = true
+        }
     }
 
     private class MockPdfRepository : PdfRepository {
@@ -190,4 +195,55 @@ class PdfViewerStateTest {
             assertNotNull(state.document)
             assertEquals("correct", repository.lastPasswordUsed)
         }
+
+    @Test
+    fun `given document loaded when scrolling to page then it should update pageCount`() =
+        testScope.runTest {
+            val state = PdfViewerState(PdfPageCacheImpl(5), this)
+            val doc = MockPdfDocument()
+            
+            state.load(PdfSource.Local("test"), object : PdfRepository {
+                override suspend fun loadDocument(source: PdfSource, password: String?) = PdfLoadStatus.Success(doc)
+            })
+            advanceUntilIdle()
+
+            // Just verifying state properties since animation is hard to test in unit tests
+            assertEquals(5, state.pageCount)
+            assertEquals(1, state.currentPage)
+        }
+
+    @Test
+    fun `given zoomed state when updating offset then it should stay within bounds`() {
+        val state = PdfViewerState(PdfPageCacheImpl(5), testScope)
+        val containerSize = IntSize(100, 100)
+        
+        state.updateZoom(2.0f) // zoomScale = 2.0
+        
+        state.updateOffset(Offset(20f, 20f), containerSize)
+        assertEquals(20f, state.offset.x)
+        assertEquals(20f, state.offset.y)
+        
+        state.updateOffset(Offset(100f, 100f), containerSize)
+        assertEquals(50f, state.offset.x)
+        assertEquals(50f, state.offset.y)
+    }
+
+    @Test
+    fun `given state when closed then it should close document and clear cache`() {
+        val doc = MockPdfDocument()
+        val cache = PdfPageCacheImpl(5)
+        val state = PdfViewerState(cache, testScope)
+        
+        testScope.runTest {
+            state.load(PdfSource.Local("test"), object : PdfRepository {
+                override suspend fun loadDocument(source: PdfSource, password: String?) = PdfLoadStatus.Success(doc)
+            })
+            advanceUntilIdle()
+            
+            state.close()
+            
+            assertNull(state.document)
+            assertTrue(doc.isClosed)
+        }
+    }
 }

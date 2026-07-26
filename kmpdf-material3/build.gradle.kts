@@ -17,6 +17,10 @@ kotlin {
         minSdk = 28
         androidResources.enable = true
         compilerOptions { jvmTarget = JvmTarget.JVM_17 }
+
+        withHostTest {
+            isIncludeAndroidResources = true
+        }
     }
 
     iosArm64()
@@ -27,6 +31,24 @@ kotlin {
             api(project(":kmpdf"))
             api(libs.compose.material3)
             api(libs.compose.material.icons)
+        }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.compose.ui.test)
+        }
+
+        getByName("androidHostTest") {
+            dependencies {
+                implementation(libs.robolectric)
+                implementation(libs.androidx.test.core)
+                implementation(libs.androidx.test.junit)
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.compose.ui.test)
+                implementation(libs.compose.ui.test.junit4)
+                implementation(libs.androidx.activityCompose)
+                implementation(libs.mockk)
+            }
         }
     }
 
