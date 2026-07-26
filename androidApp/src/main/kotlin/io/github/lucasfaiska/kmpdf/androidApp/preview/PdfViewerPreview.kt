@@ -5,22 +5,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.lucasfaiska.kmpdf.ui.PdfViewer
+import io.github.lucasfaiska.kmpdf.ui.rememberPdfViewerState
 
 @Preview(showBackground = true)
 @Composable
 fun PdfViewerPreview() {
+    val state = rememberPdfViewerState()
     PdfViewer(
-        url = "https://example.com/sample.pdf",
+        state = state,
         modifier = Modifier.fillMaxSize(),
     )
 }
 
 @Preview(showBackground = true)
 @Composable
-fun PdfViewerLoadingPreview() {
+fun PdfViewerWithToolbarPreview() {
+    val state = rememberPdfViewerState()
     PdfViewer(
-        url = "https://example.com/sample.pdf",
+        state = state,
         modifier = Modifier.fillMaxSize(),
-        showToolbar = true,
     )
 }

@@ -30,6 +30,6 @@ kotlin {
 }
 
 dependencies {
-    implementation(project(":sharedUI"))
+    implementation(project(":kmpdf-material3"))
     implementation(libs.androidx.activityCompose)
 }

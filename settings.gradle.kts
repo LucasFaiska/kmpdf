@@ -28,6 +28,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-include(":sharedLogic")
-include(":sharedUI")
+include(":kmpdf")
+include(":kmpdf-material3")
 include(":androidApp")
