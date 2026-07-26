@@ -177,15 +177,33 @@ class AndroidPdfPlatformActionsTest {
             return cursor
         }
 
-        override fun openFile(uri: Uri, mode: String): ParcelFileDescriptor? {
+        override fun openFile(
+            uri: Uri,
+            mode: String,
+        ): ParcelFileDescriptor? {
             val file = File(instance?.cacheDir ?: cacheDir, "temp_provider_file.pdf")
             FileOutputStream(file).use { it.write(instance?.data ?: data) }
             return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
         }
 
         override fun getType(uri: Uri): String? = null
-        override fun insert(uri: Uri, values: ContentValues?): Uri? = null
-        override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int = 0
-        override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<out String>?): Int = 0
+
+        override fun insert(
+            uri: Uri,
+            values: ContentValues?,
+        ): Uri? = null
+
+        override fun delete(
+            uri: Uri,
+            selection: String?,
+            selectionArgs: Array<out String>?,
+        ): Int = 0
+
+        override fun update(
+            uri: Uri,
+            values: ContentValues?,
+            selection: String?,
+            selectionArgs: Array<out String>?,
+        ): Int = 0
     }
 }

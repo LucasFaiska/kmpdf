@@ -33,7 +33,7 @@ class PdfViewerTest {
         composeTestRule.setContent {
             PdfViewer(
                 state = mockState,
-                loadingContent = { BasicText("LOAD") }
+                loadingContent = { BasicText("LOAD") },
             )
         }
 
@@ -49,7 +49,7 @@ class PdfViewerTest {
         composeTestRule.setContent {
             PdfViewer(
                 state = mockState,
-                errorContent = { BasicText(it.message ?: "") }
+                errorContent = { BasicText(it.message ?: "") },
             )
         }
 
@@ -64,7 +64,7 @@ class PdfViewerTest {
             val bitmap = state.getPage(0, 0, 0)
             isNull = bitmap == null
         }
-        
+
         assertTrue(isNull)
     }
 }

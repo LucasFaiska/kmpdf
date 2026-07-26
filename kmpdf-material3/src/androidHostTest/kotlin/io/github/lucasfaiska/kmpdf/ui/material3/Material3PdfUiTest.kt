@@ -2,7 +2,6 @@ package io.github.lucasfaiska.kmpdf.ui.material3
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import io.github.lucasfaiska.kmpdf.model.PdfSource
 import io.github.lucasfaiska.kmpdf.ui.PdfViewerState
@@ -29,16 +28,17 @@ class Material3PdfUiTest {
 
     @Test
     fun `given password dialog when displayed then it should show labels and text field`() {
-        val labels = Material3PasswordDialogLabels(
-            title = "Locked",
-            confirmButton = "GO"
-        )
-        
+        val labels =
+            Material3PasswordDialogLabels(
+                title = "Locked",
+                confirmButton = "GO",
+            )
+
         composeTestRule.setContent {
             Material3PasswordDialog(
                 isInvalid = false,
                 onConfirm = {},
-                labels = labels
+                labels = labels,
             )
         }
 
@@ -51,18 +51,19 @@ class Material3PdfUiTest {
         val state = mockk<PdfViewerState>(relaxed = true)
         every { state.currentPage } returns 1
         every { state.pageCount } returns 10
-        
+
         val source = PdfSource.Url("test.pdf")
-        val labels = Material3PdfToolbarLabels(
-            zoomIn = "Plus",
-            share = "ShareIt"
-        )
+        val labels =
+            Material3PdfToolbarLabels(
+                zoomIn = "Plus",
+                share = "ShareIt",
+            )
 
         composeTestRule.setContent {
             Material3PdfToolbar(
                 state = state,
                 source = source,
-                labels = labels
+                labels = labels,
             )
         }
     }
