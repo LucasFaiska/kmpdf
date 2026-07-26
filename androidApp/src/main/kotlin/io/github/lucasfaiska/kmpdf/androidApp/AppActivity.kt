@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -45,6 +46,7 @@ import io.github.lucasfaiska.kmpdf.material3.Material3PasswordDialog
 import io.github.lucasfaiska.kmpdf.material3.Material3PdfToolbar
 import io.github.lucasfaiska.kmpdf.model.PdfSource
 import io.github.lucasfaiska.kmpdf.ui.PdfViewer
+import io.github.lucasfaiska.kmpdf.ui.rememberPdfPlatformActions
 import io.github.lucasfaiska.kmpdf.ui.rememberPdfRepository
 import io.github.lucasfaiska.kmpdf.ui.rememberPdfViewerState
 
@@ -94,11 +96,13 @@ fun SampleApp() {
 
 @Composable
 fun SelectionScreen(onSourceSelected: (PdfSource, Boolean) -> Unit) {
+    var isCustomMode by remember { mutableStateOf(false) }
+
     val launcher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.OpenDocument(),
         ) { uri ->
-            uri?.let { onSourceSelected(PdfSource.Local(it.toString()), false) }
+            uri?.let { onSourceSelected(PdfSource.Local(it.toString()), isCustomMode) }
         }
 
     Column(
@@ -109,29 +113,38 @@ fun SelectionScreen(onSourceSelected: (PdfSource, Boolean) -> Unit) {
         Text(
             text = "kmPDF Sample App",
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 32.dp),
+            modifier = Modifier.padding(bottom = 16.dp),
         )
 
-        Button(
-            onClick = {
-                onSourceSelected(
-                    PdfSource.Url(SAMPLE_URL),
-                    false,
-                )
-            },
-            modifier =
-                Modifier
-                    .fillMaxWidth(BUTTON_WIDTH_FRACTION)
-                    .padding(8.dp),
+        Row(
+            modifier = Modifier.padding(bottom = 32.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Load from URL (Material 3)")
+            Button(
+                onClick = { isCustomMode = false },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (!isCustomMode) MaterialTheme.colorScheme.primary else Color.Gray
+                )
+            ) {
+                Text("Material 3")
+            }
+            Button(
+                onClick = { isCustomMode = true },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isCustomMode) MaterialTheme.colorScheme.primary else Color.Gray
+                )
+            ) {
+                Text("Custom UI")
+            }
         }
+
+        val modeSuffix = if (isCustomMode) " (Custom UI)" else " (Material 3)"
 
         Button(
             onClick = {
                 onSourceSelected(
                     PdfSource.Url(SAMPLE_URL),
-                    true,
+                    isCustomMode,
                 )
             },
             modifier =
@@ -139,14 +152,14 @@ fun SelectionScreen(onSourceSelected: (PdfSource, Boolean) -> Unit) {
                     .fillMaxWidth(BUTTON_WIDTH_FRACTION)
                     .padding(8.dp),
         ) {
-            Text("Load from URL (Custom UI)")
+            Text("Load from URL$modeSuffix")
         }
 
         Button(
             onClick = {
                 onSourceSelected(
                     PdfSource.Local("file:///android_asset/sample.pdf"),
-                    false,
+                    isCustomMode,
                 )
             },
             modifier =
@@ -154,7 +167,7 @@ fun SelectionScreen(onSourceSelected: (PdfSource, Boolean) -> Unit) {
                     .fillMaxWidth(BUTTON_WIDTH_FRACTION)
                     .padding(8.dp),
         ) {
-            Text("Load from Assets (Material 3)")
+            Text("Load from Assets$modeSuffix")
         }
 
         Button(
@@ -164,7 +177,7 @@ fun SelectionScreen(onSourceSelected: (PdfSource, Boolean) -> Unit) {
                     .fillMaxWidth(BUTTON_WIDTH_FRACTION)
                     .padding(8.dp),
         ) {
-            Text("Load from Device (Material 3)")
+            Text("Load from Device$modeSuffix")
         }
     }
 }
@@ -221,6 +234,7 @@ fun CustomViewerScreen(
 
     val state = rememberPdfViewerState()
     val repository = rememberPdfRepository()
+    val platformActions = rememberPdfPlatformActions()
 
     LaunchedEffect(source, repository) {
         state.load(source, repository)
@@ -231,42 +245,95 @@ fun CustomViewerScreen(
         modifier = Modifier.fillMaxSize().background(Color(0xFFF5F5F5)),
         topBar = {
             val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp + statusBarPadding)
                     .background(Color(0xFF333333))
                     .padding(top = statusBarPadding)
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "← Back",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable { onBack() }
-                )
-                Text(
-                    text = "Page ${state.currentPage} of ${state.pageCount}",
-                    color = Color.White,
-                    fontSize = 14.sp
-                )
-                Row {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Text(
-                        text = "-",
+                        text = "← Back",
                         color = Color.White,
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .clickable { state.zoomOut() },
-                        fontSize = 20.sp
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.clickable { onBack() }
                     )
-                    Text(
-                        text = "+",
-                        color = Color.White,
-                        modifier = Modifier.clickable { state.zoomIn() },
-                        fontSize = 20.sp
-                    )
+                    
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "↑",
+                            color = Color.White,
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                                .clickable { state.scrollToPage(state.currentPage - 2) },
+                            fontSize = 20.sp
+                        )
+                        Text(
+                            text = "${state.currentPage} / ${state.pageCount}",
+                            color = Color.White,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = "↓",
+                            color = Color.White,
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                                .clickable { state.scrollToPage(state.currentPage) },
+                            fontSize = 20.sp
+                        )
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "-",
+                            color = Color.White,
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                                .clickable { state.zoomOut() },
+                            fontSize = 20.sp
+                        )
+                        Text(
+                            text = "${(state.zoomScale * 100).toInt()}%",
+                            color = Color.White,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = "+",
+                            color = Color.White,
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                                .clickable { state.zoomIn() },
+                            fontSize = 20.sp
+                        )
+                    }
+
+                    Row {
+                        if (source is PdfSource.Url) {
+                            Text(
+                                text = "↓",
+                                color = Color.White,
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                                    .clickable { platformActions.download(source.url) },
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Text(
+                            text = "⇪",
+                            color = Color.White,
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                                .clickable { platformActions.share(source) },
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         },
