@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -47,14 +48,16 @@ fun PdfViewer(
     topBar: @Composable () -> Unit = {},
     loadingContent: @Composable () -> Unit = {},
     errorContent: @Composable (PdfError) -> Unit = {},
-    passwordDialog: @Composable (isInvalid: Boolean, onConfirm: (String) -> Unit) -> Unit = { _, _ -> },
+    passwordDialog: @Composable (isInvalid: Boolean, onConfirm: (String) -> Unit, onDismiss: () -> Unit) -> Unit = { _, _, _ -> },
 ) {
     val repository = rememberPdfRepository()
 
     if (state.isPasswordRequired || state.isPasswordInvalid) {
-        passwordDialog(state.isPasswordInvalid) { password ->
+        passwordDialog(state.isPasswordInvalid, { password ->
             state.unlock(password, repository)
-        }
+        }, {
+            state.cancelPasswordInput()
+        })
     }
 
     Column(modifier = modifier) {
@@ -95,7 +98,7 @@ internal fun PdfViewer(
     topBar: @Composable () -> Unit = {},
     loadingContent: @Composable () -> Unit = {},
     errorContent: @Composable (PdfError) -> Unit = {},
-    passwordDialog: @Composable (isInvalid: Boolean, onConfirm: (String) -> Unit) -> Unit = { _, _ -> },
+    passwordDialog: @Composable (isInvalid: Boolean, onConfirm: (String) -> Unit, onDismiss: () -> Unit) -> Unit = { _, _, _ -> },
 ) {
     PdfViewer(
         source = PdfSource.Url(url),
@@ -117,7 +120,7 @@ internal fun PdfViewer(
     topBar: @Composable () -> Unit = {},
     loadingContent: @Composable () -> Unit = {},
     errorContent: @Composable (PdfError) -> Unit = {},
-    passwordDialog: @Composable (isInvalid: Boolean, onConfirm: (String) -> Unit) -> Unit = { _, _ -> },
+    passwordDialog: @Composable (isInvalid: Boolean, onConfirm: (String) -> Unit, onDismiss: () -> Unit) -> Unit = { _, _, _ -> },
 ) {
     PdfViewer(
         source = PdfSource.Local(identifier),
@@ -139,7 +142,7 @@ internal fun PdfViewer(
     topBar: @Composable () -> Unit = {},
     loadingContent: @Composable () -> Unit = {},
     errorContent: @Composable (PdfError) -> Unit = {},
-    passwordDialog: @Composable (isInvalid: Boolean, onConfirm: (String) -> Unit) -> Unit = { _, _ -> },
+    passwordDialog: @Composable (isInvalid: Boolean, onConfirm: (String) -> Unit, onDismiss: () -> Unit) -> Unit = { _, _, _ -> },
 ) {
     val state = rememberPdfViewerState()
     val repository = rememberPdfRepository()
@@ -169,6 +172,7 @@ private fun PdfContent(
     Box(
         modifier =
             modifier
+                .clipToBounds()
                 .onSizeChanged { containerSize = it }
                 .pointerInput(Unit) {
                     detectTransformGestures(

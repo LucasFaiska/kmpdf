@@ -238,7 +238,11 @@ fun ViewerScreen(
                 Material3LoadingContent()
             },
             passwordDialog = { isInvalid, onConfirm ->
-                Material3PasswordDialog(isInvalid = isInvalid, onConfirm = onConfirm)
+                Material3PasswordDialog(
+                    isInvalid = isInvalid,
+                    onConfirm = onConfirm,
+                    onDismiss = { state.cancelPasswordInput() },
+                )
             },
         )
     }

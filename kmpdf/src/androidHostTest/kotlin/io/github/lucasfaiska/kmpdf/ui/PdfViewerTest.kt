@@ -64,7 +64,7 @@ class PdfViewerTest {
         composeTestRule.setContent {
             PdfViewer(
                 state = mockState,
-                passwordDialog = { _, _ -> BasicText("LOCKED") },
+                passwordDialog = { _, _, _ -> BasicText("LOCKED") },
             )
         }
 

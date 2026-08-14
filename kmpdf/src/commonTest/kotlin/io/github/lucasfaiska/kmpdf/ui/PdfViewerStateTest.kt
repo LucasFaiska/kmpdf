@@ -218,6 +218,23 @@ class PdfViewerStateTest {
         }
 
     @Test
+    fun `given password required state when cancelled then it should reset password flags`() =
+        testScope.runTest {
+            val repository = MockPdfRepository().apply { requiredPassword = true }
+            val state = PdfViewerState(PdfPageCacheImpl(5), this)
+
+            state.load(PdfSource.Local("protected"), repository)
+            advanceUntilIdle()
+            assertTrue(state.isPasswordRequired)
+
+            state.cancelPasswordInput()
+
+            assertFalse(state.isPasswordRequired)
+            assertFalse(state.isPasswordInvalid)
+            assertFalse(state.loading)
+        }
+
+    @Test
     fun `given document loaded when scrolling to page then it should update pageCount`() =
         testScope.runTest {
             val state = PdfViewerState(PdfPageCacheImpl(5), this)

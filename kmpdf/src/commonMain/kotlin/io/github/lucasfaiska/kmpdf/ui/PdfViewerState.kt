@@ -151,6 +151,16 @@ class PdfViewerState internal constructor(
     }
 
     /**
+     * Cancels the password input and resets the password states.
+     */
+    fun cancelPasswordInput() {
+        isPasswordRequired = false
+        isPasswordInvalid = false
+        currentSource = null
+        loading = false
+    }
+
+    /**
      * Scrolls to a specific page.
      *
      * @param index The 0-based index of the page.

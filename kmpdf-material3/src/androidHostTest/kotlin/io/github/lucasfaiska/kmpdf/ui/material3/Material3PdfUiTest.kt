@@ -42,6 +42,7 @@ class Material3PdfUiTest {
             Material3PasswordDialog(
                 isInvalid = false,
                 onConfirm = {},
+                onDismiss = {},
                 labels = labels,
             )
         }
@@ -58,6 +59,7 @@ class Material3PdfUiTest {
             Material3PasswordDialog(
                 isInvalid = false,
                 onConfirm = {},
+                onDismiss = {},
                 labels = labels,
             )
         }
@@ -77,6 +79,7 @@ class Material3PdfUiTest {
             Material3PasswordDialog(
                 isInvalid = false,
                 onConfirm = { confirmedPassword = it },
+                onDismiss = {},
                 labels = labels,
             )
         }
@@ -85,6 +88,25 @@ class Material3PdfUiTest {
         composeTestRule.onNodeWithText("GO").performClick()
 
         assert(confirmedPassword == "secret")
+    }
+
+    @Test
+    fun `given password dialog when cancel clicked then it should trigger dismiss callback`() {
+        var dismissed = false
+        val labels = Material3PasswordDialogLabels(cancelButton = "NO")
+
+        composeTestRule.setContent {
+            Material3PasswordDialog(
+                isInvalid = false,
+                onConfirm = {},
+                onDismiss = { dismissed = true },
+                labels = labels,
+            )
+        }
+
+        composeTestRule.onNodeWithText("NO").performClick()
+
+        assert(dismissed)
     }
 
     @Test
