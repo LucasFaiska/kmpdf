@@ -10,6 +10,7 @@ import androidx.compose.runtime.Immutable
  * @property errorMessage The error message shown when the password is incorrect.
  * @property textFieldLabel The label for the password text field.
  * @property confirmButton The text for the confirm button.
+ * @property cancelButton The text for the cancel button.
  */
 @Immutable
 data class Material3PasswordDialogLabels(
@@ -18,4 +19,5 @@ data class Material3PasswordDialogLabels(
     val errorMessage: String = "Incorrect password. Please try again.",
     val textFieldLabel: String = "Password",
     val confirmButton: String = "Open",
+    val cancelButton: String = "Cancel",
 )

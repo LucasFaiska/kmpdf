@@ -8,6 +8,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,12 +27,14 @@ import androidx.compose.ui.unit.dp
  *
  * @param isInvalid Whether the last password attempt was invalid.
  * @param onConfirm Callback when the password is confirmed.
+ * @param onDismiss Callback when the dialog is dismissed or cancelled.
  * @param labels The labels to be used for text in the dialog.
  */
 @Composable
 fun Material3PasswordDialog(
     isInvalid: Boolean,
     onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit,
     labels: Material3PasswordDialogLabels = Material3PasswordDialogLabels(),
 ) {
     var password by remember { mutableStateOf("") }
@@ -42,7 +45,7 @@ fun Material3PasswordDialog(
     }
 
     AlertDialog(
-        onDismissRequest = {},
+        onDismissRequest = onDismiss,
         title = { Text(labels.title) },
         text = {
             Column {
@@ -72,6 +75,11 @@ fun Material3PasswordDialog(
                 enabled = password.isNotBlank(),
             ) {
                 Text(labels.confirmButton)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(labels.cancelButton)
             }
         },
     )

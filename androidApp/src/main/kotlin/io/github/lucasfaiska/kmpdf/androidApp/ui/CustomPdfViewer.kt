@@ -66,8 +66,8 @@ fun CustomViewerScreen(
                 Text("Loading Custom UI...", color = Color.Gray)
             }
         },
-        passwordDialog = { isInvalid, onConfirm ->
-            CustomPasswordDialog(isInvalid, onConfirm)
+        passwordDialog = { isInvalid, onConfirm, onDismiss ->
+            CustomPasswordDialog(isInvalid, onConfirm, onDismiss)
         },
     )
 }
@@ -204,12 +204,14 @@ private fun CustomPlatformActions(
 private fun CustomPasswordDialog(
     isInvalid: Boolean,
     onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit,
 ) {
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.6f)),
+                .background(Color.Black.copy(alpha = 0.6f))
+                .clickable { onDismiss() },
         contentAlignment = Alignment.Center,
     ) {
         Column(
@@ -217,7 +219,8 @@ private fun CustomPasswordDialog(
                 Modifier
                     .fillMaxWidth(PASSWORD_DIALOG_WIDTH_FRACTION)
                     .background(Color.White)
-                    .padding(24.dp),
+                    .padding(24.dp)
+                    .clickable(enabled = false) {},
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
@@ -239,15 +242,25 @@ private fun CustomPasswordDialog(
                         .background(Color.LightGray)
                         .padding(8.dp),
             )
-            Text(
-                "UNLOCK",
-                modifier =
-                    Modifier
-                        .background(Color.Black)
-                        .padding(8.dp)
-                        .clickable { onConfirm(password) },
-                color = Color.White,
-            )
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text(
+                    "CANCEL",
+                    modifier =
+                        Modifier
+                            .padding(8.dp)
+                            .clickable { onDismiss() },
+                    color = Color.Black,
+                )
+                Text(
+                    "UNLOCK",
+                    modifier =
+                        Modifier
+                            .background(Color.Black)
+                            .padding(8.dp)
+                            .clickable { onConfirm(password) },
+                    color = Color.White,
+                )
+            }
         }
     }
 }
